@@ -1,0 +1,152 @@
+---
+title: "Graphics Project"
+output: html_notebook
+---
+
+```{r}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message =  FALSE)
+library(ggplot2)
+library(GGally)
+library(dplyr)
+```
+
+##I. Introduction
+
+##II. Description of the data source
+
+##III. Description of data import / cleaning / transformation
+
+####Read in Raw Data
+```{r}
+Sn <- read.csv("data(raw)/Sn.csv",skip = 2, na.strings = "No Data")
+Sp <- read.csv("data(raw)/Sp.csv",skip = 2, na.strings = "No Data")
+On <- read.csv("data(raw)/On.csv",skip = 2, na.strings = "No Data")
+Op <- read.csv("data(raw)/Op.csv",skip = 2, na.strings = "No Data")
+PGn <- read.csv("data(raw)/PGn.csv",skip = 2, na.strings = "No Data")
+PGp <- read.csv("data(raw)/PGp.csv",skip = 2, na.strings = "No Data")
+Dn <- read.csv("data(raw)/Dn.csv",skip = 2, na.strings = "No Data")
+Dp <- read.csv("data(raw)/Dp.csv",skip = 2, na.strings = "No Data")
+Phn <- read.csv("data(raw)/Phn.csv",skip = 2, na.strings = "No Data")
+Php <- read.csv("data(raw)/Php.csv",skip = 2, na.strings = "No Data")
+Hypern <- read.csv("data(raw)/Hypern.csv",skip = 2, na.strings = "No Data")
+Hyperp <- read.csv("data(raw)/Hyperp.csv",skip = 2, na.strings = "No Data")
+HCn <- read.csv("data(raw)/HCn.csv",skip = 2, na.strings = "No Data")
+HCp <- read.csv("data(raw)/HCp.csv",skip = 2, na.strings = "No Data")
+alcohol <- read.csv("data(raw)/alcohol.csv")
+sugar1 <- read.csv("data(raw)/sugar2.csv")
+sugar2 <- read.csv("data(raw)/sugar3.csv")
+underH <- read.csv("data(raw)/<H.csv",skip = 2, na.strings = "No Data")
+H <- read.csv("data(raw)/H.csv",skip = 2, na.strings = "No Data")
+postH <- read.csv("data(raw)/>H.csv",skip = 2, na.strings = "No Data")
+age1 <- read.csv("data(raw)/18-44.csv",skip = 2, na.strings = "No Data")
+age2 <- read.csv("data(raw)/45-64.csv",skip = 2, na.strings = "No Data")
+age3 <- read.csv("data(raw)/65-74.csv",skip = 2, na.strings = "No Data")
+age4 <- read.csv("data(raw)/75+.csv",skip = 2, na.strings = "No Data")
+GDP2015 <- read.csv("data(raw)/2015.csv",skip = 4)
+GDP2016 <- read.csv("data(raw)/2016.csv", skip = 4)
+```
+
+####Basic Data Cleaning
+
+```{r}
+clean <- function(df1,df2){
+  df1 <- df1[-nrow(df1),]
+  df1 <- df1[-nrow(df1),]
+  overall <- merge(df1,df2, by="State")
+  return(overall)
+}
+clean2 <- function(df1){
+  df1 <- df1[-nrow(df1),] %>% select(1:2)
+  return(df1)
+}
+```
+
+```{r}
+Smoking <- clean(Sn,Sp)
+Smoking$Type <- rep("Smoking",nrow(Smoking))
+Obesity <- clean(Op, On)
+Obesity$Type <- rep("Obesity",nrow(Obesity))
+Poor_Health <- clean(PGn, PGp)
+Poor_Health$Type <- rep("Poor_Health",nrow(Poor_Health))
+Num <- clean(Dn,Dp)
+Num$Type <- rep("Num",nrow(Num))
+Inactivity <- clean(Phn,Php)
+Inactivity$Type <- rep("Inactivity",nrow(Inactivity))
+Hypertension <- clean(Hyperp,Hypern)
+Hypertension$Type <- rep("Hypertension",nrow(Hypertension))
+Cholesterol <- clean(HCn, HCp)
+Cholesterol$Type <- rep("Cholesterol",nrow(Cholesterol))
+
+alcohol <- alcohol %>% 
+  select(2:5) %>% 
+  mutate(Num.Drink = Total.Cost.../Cost.Per.Drink...)
+
+names(sugar1) <- c("State","No.","18-24","25-34","35-54",">55","Male","Female","White","Black","Hispanic","Other")
+names(sugar2) <- c("State","No.","Employed","Unemployed","Retired","<HighSchool","HighSchool","College","College.Grad")
+
+SweetBev <- merge(sugar1,sugar2,by="State")
+SweetBev <- SweetBev[!duplicated(as.list(SweetBev))]
+names(SweetBev)[2] <- "Number"
+
+underH <- clean2(underH)
+names(underH) <- c("State","UnderHighSchool")
+H <- clean2(H)
+names(H) <- c("State","HighSchool")
+postH <- clean2(postH)
+names(postH) <- c("State","HighSchool+")
+
+education <- merge(merge(underH,H,by="State"),postH,by="State")
+
+age1 <- clean2(age1)
+age2 <- clean2(age2)
+age3 <- clean2(age3)
+age4 <- clean2(age4)
+
+names(age1) <- c("State","18-44")
+names(age2) <- c("State","45-64")
+names(age3) <- c("State","65-74")
+names(age4) <- c("State","75+")
+Age <- merge(merge(merge(age1,age2,by="State"),age3, by="State"),age4,by="State")
+
+GDP2015 <- GDP2015[1:(nrow(GDP2015)-3),]
+GDP2016 <- GDP2016[1:(nrow(GDP2016)-3),]
+
+Indicators <- rbind(Smoking,Obesity,Poor_Health,Num, Inactivity,Hypertension, Cholesterol)
+Indicators$Type <- as.factor(Indicators$Type)
+##Mcdonal's
+##
+
+```
+
+
+```{r}
+Indicators
+
+Age
+
+education
+
+SweetBev
+
+GDP2015
+
+GDP2016
+```
+
+
+##IV. Analysis of missing values
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
