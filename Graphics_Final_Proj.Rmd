@@ -10,15 +10,83 @@ knitr::opts_chunk$set(message =  FALSE)
 library(ggplot2)
 library(GGally)
 library(dplyr)
+library(tidyverse)
+library(rvest)
 ```
 
 ##I. Introduction
 
 ##II. Description of the data source
 
+We both collected data in terms of different variables. Data are all from "Centers for Disease Control and Prevention" in the form of downloading excels (or csv) or scraping data from the web pages. Factors causing diabetes are grouped by several categories including body indicators, age, education, sweet beverage consumption, alcohol, and per capita GDP. Records are based on 55 states of US. 
+
+Regarding sweet beverage consumption among adults, we only obtained data from 24 states.
+
+
+####https://gis.cdc.gov/grasp/diabetes/DiabetesAtlas.html
+
 ##III. Description of data import / cleaning / transformation
 
 ####Read in Raw Data
+
+```{r}
+alcohol <- read_html("https://www.cdc.gov/alcohol/data-stats.htm") %>%
+  html_nodes("table") %>%
+  html_table(fill = TRUE) %>%
+  data.frame()
+colnames(alcohol) <- c("Location", "Total Cost($)","Cost Per Drink($)","Cost Per Capital($)")
+alcohol$`Total Cost($)` <- as.numeric(gsub(",","",alcohol$`Total Cost($)`))
+alcohol$`Cost Per Capital($)` <- as.numeric(gsub(",","",alcohol$`Cost Per Capital($)`))
+# alcohol
+# write.csv(alcohol, file = "alcohol.csv")
+```
+
+```{r}
+sugar2 <- read_html("https://www.cdc.gov/mmwr/volumes/65/wr/mm6507a1.htm#T2_down") %>%
+  html_nodes("table") %>%
+  html_table(fill=TRUE) %>%
+  .[2] %>%
+  data.frame()
+
+colnames(sugar2) <- sugar2[2,]
+sugar2 <- sugar2[c(-1,-2,-3),]
+sugar2$`18–24` <- as.numeric(sapply(unlist(sugar2$`18–24`),substr,1,4))
+sugar2$`25–34` <- as.numeric(sapply(unlist(sugar2$`25–34`),substr,1,4))
+sugar2$`35–54` <- as.numeric(sapply(unlist(sugar2$`35–54`),substr,1,4))
+sugar2$`≥55` <- as.numeric(sapply(unlist(sugar2$`≥55`),substr,1,4))
+sugar2$Male <- as.numeric(sapply(unlist(sugar2$Male),substr,1,4))
+sugar2$Female <- as.numeric(sapply(unlist(sugar2$Female),substr,1,4))
+sugar2$`White, Non-Hispanic` <- as.numeric(sapply(unlist(sugar2$`White, Non-Hispanic`),substr,1,4))
+sugar2$`Black, Non-Hispanic` <- as.numeric(sapply(unlist(sugar2$`Black, Non-Hispanic`),substr,1,4))
+sugar2$Hispanic <- as.numeric(sapply(unlist(sugar2$Hispanic),substr,1,4))
+sugar2$`Other, Non-Hispanic` <- as.numeric(sapply(unlist(sugar2$`Other, Non-Hispanic`),substr,1,4))
+sugar2$`No. respondents` <- as.numeric(gsub(",","",sugar2$`No. respondents`))
+# sugar2
+# write.csv(sugar2, file = "sugar2.csv")
+```
+
+```{r}
+sugar3 <- read_html("https://www.cdc.gov/mmwr/volumes/65/wr/mm6507a1.htm#T3_down") %>%
+  html_nodes("table") %>%
+  html_table(fill=TRUE) %>%
+  .[3] %>%
+  data.frame()
+
+colnames(sugar3) <- sugar3[2,]
+sugar3 <- sugar3[c(-1,-2,-3),]
+sugar3$Employed <- as.numeric(sapply(unlist(sugar3$Employed),substr,1,4))
+sugar3$`Not employed` <- as.numeric(sapply(unlist(sugar3$`Not employed`),substr,1,4))
+sugar3$Retired <- as.numeric(sapply(unlist(sugar3$`Not employed`),substr,1,4))
+sugar3$`<High school` <- as.numeric(sapply(unlist(sugar3$`<High school`),substr,1,4))
+sugar3$`High school` <- as.numeric(sapply(unlist(sugar3$`High school`),substr,1,4))
+sugar3$`Some college` <- as.numeric(sapply(unlist(sugar3$`Some college`),substr,1,4))
+sugar3$`College graduate` <- as.numeric(sapply(unlist(sugar3$`College graduate`),substr,1,4))
+sugar3$`No. respondents` <- as.numeric(gsub(",","",sugar3$`No. respondents`))
+# sugar3
+# write.csv(sugar3, file = "sugar3.csv")
+```
+
+
 ```{r}
 Sn <- read.csv("data(raw)/Sn.csv",skip = 2, na.strings = "No Data")
 Sp <- read.csv("data(raw)/Sp.csv",skip = 2, na.strings = "No Data")
@@ -122,13 +190,15 @@ Indicators$Type <- as.factor(Indicators$Type)
 
 
 ```{r}
-Indicators
+table(Indicators$Type)
 
 Age
 
 education
 
 SweetBev
+
+alcohol
 
 GDP2015
 
@@ -139,6 +209,7 @@ GDP2016
 ##IV. Analysis of missing values
 
 ```{r}
+extracat::visna(Age)
 
 ```
 
