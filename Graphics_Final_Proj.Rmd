@@ -164,13 +164,14 @@ clean2 <- function(df1){
 }
 ```
 
+*DataFrame1--Minor Risk Factors*
 ```{r}
 Smoking <- clean(Sn,Sp)
 Smoking$Type <- rep("Smoking",nrow(Smoking))
-#Smoking
 
 Obesity <- clean(Op, On)
 Obesity$Type <- rep("Obesity",nrow(Obesity))
+
 
 Poor_Health <- clean(PGn, PGp)
 Poor_Health$Type <- rep("Poor_Health",nrow(Poor_Health))
@@ -187,27 +188,57 @@ Hypertension$Type <- rep("Hypertension",nrow(Hypertension))
 Cholesterol <- clean(HCn, HCp)
 Cholesterol$Type <- rep("HighCholesterol",nrow(Cholesterol))
 
+Indicators <- rbind(Smoking,Obesity,Poor_Health,Num, Inactivity,Hypertension, Cholesterol)
+Indicators$Type <- as.factor(Indicators$Type)
+Indicators <- Indicators[-nrow(Indicators),]
+#Indicators
+```
+
+*DataFrame2--LifeStyle*
+```{r}
 alcohol <- alcohol %>% 
   select(2:5) %>% 
-  mutate(Num.Drink = Total.Cost.../Cost.Per.Drink...)
+  mutate(Num.Drink.per.Capita = ceiling(Cost.Per.Capital.../Cost.Per.Drink...))
 names(alcohol)[1] <- "State"
+#alcohol
 
-names(sugar1) <- c("State","No.","18-24","25-34","35-54","55+","Male","Female","White","Black","Hispanic","Other")
-names(sugar2) <- c("State","No.","Employed","Unemployed","Retired","underHighSchool","HighSchool","College","College.Grad")
 names(sugar3) <- c("State","ResponseNum","NoSweetBev","less1perDay","more1perDay")
+SweetBev <- sugar3 %>% select(1,3,4,5)
+#SweetBev
+
+mcdonald <- mcdonald %>% select(State, Rank,McDonald.s.per.100.000)
+mcdonald$McDonald.s.per.100.000 <- as.numeric(gsub("[[:punct:]]","",as.character(mcdonald$McDonald.s.per.100.000)))
+names(mcdonald)[3] <- "McDonald.s.per.1M" 
+#mcdonald
+
+EatHab <- merge(merge(SweetBev,alcohol%>%select(1,5),by="State"),mcdonald%>%select(1,3),by="State")
+#EatHab
+```
+
+something maybe useful later
+```{r}
+# names(sugar1) <- c("State","No.","18-24","25-34","35-54","55+","Male","Female","White","Black","Hispanic","Other")
+# names(sugar2) <- c("State","No.","Employed","Unemployed","Retired","underHighSchool","HighSchool","College","College.Grad")
+
 #sugar3
 
-SweetBev <- full_join(sugar1,sugar2,by="State")
-SweetBev <- SweetBev[!duplicated(as.list(SweetBev))]
-names(SweetBev)[2] <- "ResNumber"
+# SweetBev <- full_join(sugar1,sugar2,by="State")
+# SweetBev <- SweetBev[!duplicated(as.list(SweetBev))]
+# names(SweetBev)[2] <- "ResNumber"
+```
 
+*Major Influencial Factors*
+
+```{r}
 underH <- clean2(underH)
 names(underH) <- c("State","UnderHighSchool")
 H <- clean2(H)
 names(H) <- c("State","HighSchool")
 postH <- clean2(postH)
-names(postH) <- c("State","HighSchool+")
+names(postH) <- c("State","PostHighSchool")
 education <- full_join(full_join(underH,H,by="State"),postH,by="State")
+
+education
 
 
 age1 <- clean2(age1)
@@ -220,40 +251,31 @@ names(age3) <- c("State","65-74")
 names(age4) <- c("State","75+")
 Age <- full_join(full_join(full_join(age1,age2,by="State"),age3, by="State"),age4,by="State")
 
-GDP2015 <- GDP2015[1:(nrow(GDP2015)-3),]
-GDP2016 <- GDP2016[1:(nrow(GDP2016)-3),]
-
-Indicators <- rbind(Smoking,Obesity,Poor_Health,Num, Inactivity,Hypertension, Cholesterol)
-Indicators$Type <- as.factor(Indicators$Type)
-mcdonald <- mcdonald %>% select(State, Rank, No..of.Mcdonald.s.locations)
-names(mcdonald) <- c("State","Rank","McNumber")
-#mcdonald
+Major <- full_join(education,Age,by="State")
+Major
 ```
 
+*Other Factors: GDP*
+```{r}
+GDP2015 <- GDP2015[2:(nrow(GDP2015)-11),]
+GDP2016 <- GDP2016[2:(nrow(GDP2016)-11),]
+names(GDP2015)[2:3] <- c("State","GDP2015")
+GDP <- GDP2015 %>% select(2,3)
+#GDP
+```
+
+**Load Cleaned Data**
+```{r}
+load("Indicators.RData")
+load("EatHab.RData")
+load("Major.RData")
+load("GDP.RData")
+```
 
 ```{r}
 ms <- Indicators %>% select(1,3,6) %>% spread(Type, Percentage)
-ms1 <- full_join(full_join(full_join(full_join(ms,Age,by="State"),education,by="State"),sugar3%>%select(1,3,4,5),by="State"), mcdonald, by="State")
-# ms1 #dataframe of all indicators with percentage values
-# 
-# Indicators
-# 
-# Age
-# 
-# education
-# 
-# sugar3
-
-# ms2 <- full_join(mcdonald,alcohol%>%select(1,5),by="State")
-# ms2 #dataframe of indicators with exact number (mc+alcohol)
-# 
-# mcdonald
-# 
-# alcohol
-# 
-# GDP2015
-# 
-# GDP2016
+missingV <- full_join(full_join(full_join(full_join(ms,Age,by="State"),education,by="State"),SweetBev,by="State"), mcdonald%>%select(1,3), by="State")
+missingV
 ```
 
 
@@ -262,11 +284,11 @@ ms1 <- full_join(full_join(full_join(full_join(ms,Age,by="State"),education,by="
 Do we have missing values for datasets that involving all the variables?
 
 ```{r}
-colSums(is.na(ms1))
+colSums(is.na(missingV))
 ```
 
 ```{r}
-extracat::visna(ms1, sort="b")
+extracat::visna(missingV, sort="b")
 ```
 
 Yes, we do. Here, we visualized missing patterns using the visna function in the extracat package. From above plot, we realized that there are 5 missing patterns by each row, and most columns have some kinds of missing values. By sorting both rows and columns, sweet beverage consumption related variables (NoSweetBev, less1perDay, more1perDay) have the most missing values, and we observed the top two most common missing patterns.
@@ -275,32 +297,59 @@ Yes, we do. Here, we visualized missing patterns using the visna function in the
 ```{r}
 #heatmap(1 * is.na(ms1), Rowv = NA, Colv = NA)
 #ms1
-image(missing_data.frame(ms1))
+image(missing_data.frame(missingV))
 #extracat::visna(ms1)
 ```
 
-**Dealing with missing values**
+**Dealing with missing values and Save as RData for convenience**
+
+```{r}
+# Indicators <- na.omit(Indicators)
+# save(Indicators,file = "Indicators.RData")
+# #EatHab
+# save(EatHab,mcdonald,alcohol,SweetBev,file = "EatHab.RData")
+# 
+# Major <- na.omit(Age, education, Major[-1,])
+# #Major
+# save(Age, education, Major,file = "Major.RData")
+# 
+# #GDP
+# save(GDP,file = "GDP.RData")
+```
+
+
+
 
 ###Minor Risk Factors
 
-**Dot Plots(Facet-wrap)**
+*Minor Risk Ractors Dataframe Reordered by Diagnosed Number*
 ```{r}
-df_percent <- na.omit(ms1[,1:8][order(ms1$Num,decreasing = T),])
+df_percent <- na.omit(ms[,1:8][order(ms$Num),])
 df_percent <- df_percent %>% 
-  filter(State != "Median of States") %>% 
-  mutate(Rank = c(1:51))
-#df_percent
+  filter(State != "Median of States" & State != "Guam" & State != "Puerto Rico") %>% 
+  mutate(Rank = c(1:49))
+df_percent
 ```
 
+
+**Dot Plots(Facet-wrap)**
+**Diagnosed Number Against Every Minor Risk Factor**
 ```{r}
+###rescale(narrow down) the dataframe for Num
+
 df_num <- gather(df_percent,key = "Type", value = "Percent", colnames(df_percent%>%select(2:4,6:8)))
 #df_num
 ```
 
 
 ```{r}
+###Plot
+
 ggplot(df_num%>%filter(State != "Puerto Rico"),aes(x=Num, y=Percent))+geom_point() + facet_wrap(~ Type)+ggtitle("Diagnosed Diabetes vs. Potential Risk Factors") + xlab("Diagnosed Diabetes")
 ```
+
+Idea: approximately all proportion of risk factors increases as proportion of diagnosed diabetes increases. Positively correlated. 
+
 
 **Parallel Coordinates Plot**
 
@@ -309,22 +358,75 @@ df_all <- gather(df_percent,key = "RiskFactor", value = "Percent", colnames(df_p
 #df_all
 temp <- df_all %>% group_by(RiskFactor) %>%
   mutate(Percent = scales::rescale(Percent)) %>% ungroup()
+#temp
+
 g1 <- ggplot(temp%>%filter(State != "Puerto Rico"), aes(x = reorder(State,Rank), y = Percent,group=RiskFactor,col=RiskFactor)) + 
   geom_line(alpha = .5) + ggtitle("Diagnosed Diabetes and Risk Factors")
 g1+theme(axis.text.x = element_text(angle = 90))+xlab("Risk Factor")
 ```
 
+From Parllel Coordinate Plot, we can see the trend more clear.
 
+**Major Risk Factors**
+*Age,Education, Life(Eating Habits)*
 
+AGE
 
 ```{r}
-# Age <- na.omit(Age[-1,])
-# full_join(Age, Num)%>%select(1:5,7)
-# df_age <- gather(Age, key = "Age", value = "Percent", colnames(Age%>%select(2:5)))
-# df_age
-# ggparcoord(df_age, columns = 3, groupColumn = 2)
+Age <- na.omit(Age[-1,])
+Age <- Age%>%filter(State != "Puerto Rico"&State!="Guam")
+# Age$State
+# state.abb[match(Age$State,state.name)]
+# Age$State <- state.abb[match(Age$State,state.name)]
+#na.omit(full_join(Age, Num)%>%select(1:5,7))
+df_age <- gather(Age, key = "Age", value = "Percent", colnames(Age%>%select(2:5)))
+#df_age
+df_age1 <- df_age %>% spread(State, Percent)
+#df_age1
+ggparcoord(df_age1, columns = 2:49, scale = "globalminmax", groupColumn = 1)+theme(axis.text.x = element_text(angle = 90))+xlab("State")+ylab("Percentage")+ggtitle("Age Distribution in Each State")
 ```
 
+Idea: 年龄越大越容易得，主要集中于65-74岁,等等。分析一下为什么。年纪大了胰脏代谢功能不好了等等。
+Note: add % on y-axis.
+
+
+*Education(Awareness of keeping fit/weight control/healthy lifestyle)*
+
+```{r}
+df_edu <- merge(na.omit(education[-c(1,53,54),]),df_percent %>% select(1,9),by="State")
+df_edu <- gather(df_edu,key = "edu_level",value = "percent",colnames(df_edu)[2:4])
+
+ggplot(df_edu,aes(x=percent,y=reorder(State,Rank),color=edu_level,label = percent))+
+  geom_text(aes(color = edu_level), size = 3)+
+  theme(legend.position = "top")+
+  ylab("State")+
+  ggtitle("Education Level in each State (ordered by Number of Diabetes)")
+```
+
+idea: 非常明显，学历越低的群体越多人患病，可能由于不注意健身，饮食习惯不佳等。接着往下看饮食习惯是否会影响。
+
+*excessive alcohol*
+
+```{r}
+alcohol
+df_alcohol <-merge(alcohol %>% select(1,5),df_percent%>%select(1,9))
+df_alcohol
+ggplot(df_alcohol)+geom_bar(aes(x=reorder(State,Rank),y=Num.Drink.per.Capita,fill=-Rank),stat = "identity")+coord_flip()
+```
+
+Idea: No clear pattern or trend but approximately number of excessive drinks per capita increases as number of diagnosed diabetes increases. 非常weird超出想象但是在查阅资料后发现过量饮酒确实有可能导致血糖降低，但这并不代表过量饮酒能够帮助缓解糖尿病。只是酒的量与种类有关。接下来看beer的影响。
+
+
+*Fast Fried/oily food (eg. Mcdonald's)*
+
+```{r}
+mcdonald
+df_percent %>% select(1,9)
+
+ggplot(merge(df_percent %>%select(1,9),mcdonald%>%select(1,3),by="State"))+geom_bar(aes(x=reorder(State,Rank),y=McDonald.s.per.1M),stat="identity")+coord_flip()
+```
+
+IDEA: 看起来有pattern了 但是可能会换一种图画，可以试试看。
 
 ##V. Results
 ```{r}
