@@ -186,6 +186,17 @@ ms1
 
 ###Minor Risk Factors
 
+**Dot Plots(Facet-wrap)**
+```{r}
+df_num <- gather(df_percent,key = "Type", value = "Percent", colnames(df_percent%>%select(2:4,6:8)))
+#df_num
+```
+
+
+```{r}
+ggplot(df_num%>%filter(State != "Puerto Rico"),aes(x=Num, y=Percent))+geom_point() + facet_wrap(~ Type)+ggtitle("Diagnosed Diabetes vs. Potential Risk Factors") + xlab("Diagnosed Diabetes")
+```
+
 **Parallel Coordinates Plot**
 ```{r}
 df_percent <- na.omit(ms1[,1:8][order(ms1$Num,decreasing = T),])
@@ -205,16 +216,7 @@ g1 <- ggplot(temp%>%filter(State != "Puerto Rico"), aes(x = reorder(State,Rank),
 g1+theme(axis.text.x = element_text(angle = 90))+xlab("Risk Factor")
 ```
 
-**Dot Plots(Facet-wrap)**
-```{r}
-df_num <- gather(df_percent,key = "Type", value = "Percent", colnames(df_percent%>%select(2:4,6:8)))
-#df_num
-```
 
-
-```{r}
-ggplot(df_num%>%filter(State != "Puerto Rico"),aes(x=Num, y=Percent))+geom_point() + facet_wrap(~ Type)+ggtitle("Diagnosed Diabetes vs. Potential Risk Factors") + xlab("Diagnosed Diabetes")
-```
 
 
 ```{r}
