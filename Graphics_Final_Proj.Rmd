@@ -16,6 +16,7 @@ library(tidyr)
 library(mi)
 library(forcats)
 require(gdata)
+library(tidyverse)
 library(rvest)
 library(vcd)
 ```
@@ -24,14 +25,96 @@ library(vcd)
 
 ##II. Description of the data source
 
-We both collected data in terms of different variables. Data are all from "Centers for Disease Control and Prevention" in the form of downloading excels (or csv) or scraping data from the web pages. Factors causing diabetes are grouped by several categories including body indicators, age, education, sweet beverage consumption, alcohol, and per capita GDP. Records are based on 55 states of US. 
+After considering potential influencing factors of diabetes, we are both responsible for collecting data in terms of different factors. Data are all from the original sources and mostly from "Centers for Disease Control and Prevention" and "Bureau of Economic Analysis" from U.S. Department of Commerce. In the form of getting the data, we either directly downloaded excels (or csv) or scraped data from the web pages. 
 
-Regarding sweet beverage consumption among adults, we only obtained data from 24 states.
+Factors causing diabetes are grouped by several categories including physical indicators, age, education, diet habits, alcohol, and per capita GDP. Records are based on 53 states of US. In choosing data types, we do have total number and percentage of each factor (variable) for each state; however, every state has different amount of population, we will consider percentages of the totol number of each factor among total population as our metrice.
 
+For physical indicators, High Cholesterol, Hypertension, Inactivity, Obesity, Poor Health and Smoking are counted. 
 
-####https://gis.cdc.gov/grasp/diabetes/DiabetesAtlas.html
+Age will be classified in 4 categories which are 18-44, 45-64, 65-74 and 75+. In each classification, we have percentages of diagnosed diabetes of each age range for 53 states. 
+
+Since education will enhance one's self-management ability and enrich scientific knowledges so that we wonder if education levels would be a factor and how much it will be related to diabetes. Education levels are specified by three types including under high school, high school and post high school. Each state will have a percentage of diabete rates corresponding to each education levels.
+
+In order to consider diet habits that affacting diabetes, we took sweet beverage consumption among adults and the number of McDonald's location among states as metrices. Unfortunately, we are only able to obtain data of the first kind (sweet beverage consumption) from 24 states. 
+
+Alcohol is a kind of popular lifestyle in US which let us to think about whether excessive alcohol consumption is one of major factor causing diabetes in the long run. 
+
+Moreover, Per capita GDP is also important indicator for representing economic condition of each state, which might potentially affacts the chance of being diabetes.
+
+####Reference
+
+https://gis.cdc.gov/grasp/diabetes/DiabetesAtlas.html <br>
+https://www.statista.com/statistics/631235/number-of-mcdonald-s-us-by-state/ <br>
+https://www.cdc.gov/alcohol/data-stats.htm <br> 
+https://www.cdc.gov/mmwr/volumes/65/wr/mm6507a1.htm <br>
+https://apps.bea.gov/itable/iTable.cfm?ReqID=70&step=1#reqid=70&step=1&isuri=1 <br>
+
 
 ##III. Description of data import / cleaning / transformation
+
+For the parts of data that directly downloading excel or csv from orginial websites, we used read.csv() to import into R for further data processing. Those data are including High Cholesterol, Hypertension, Inactivity, Obesity, Poor Health, Smoking, age, education, per capita GDP and number of McDonald's location.
+
+On the other part of data that does not have nice downloadable excel or csv, we used packages tidyverse and rvest to scrap tables from webpages and saved those tables into our .data/raw in .csv format. Those data include alcohol and sweet beverage consumption. In alcohol data frame, we renamed each column as Location, Total Cost, Cost Per Drink, Cost Per Capital respectively. In sweet beverage consumption data frame, we scraped two tables from one web page. After we checked each list item, it turns out that the tables we want are the second and third list elements: one is sweetened beverage consumption that are further specified by different ages, genders, races; the other is sweetened beverage consumption that are further specified by different employment status and education levels. Column names are taken into consideration to define each variable, and we removed the rows we don’t need. All numeric related data are cleaned from character form to numeric or integer form for being ready to later analysis.
+
+
+####Scraping data from webpages
+```{r}
+alcohol <- read_html("https://www.cdc.gov/alcohol/data-stats.htm") %>%
+  html_nodes("table") %>%
+  html_table(fill = TRUE) %>%
+  data.frame()
+colnames(alcohol) <- c("Location", "Total Cost($)","Cost Per Drink($)","Cost Per Capital($)")
+alcohol$`Total Cost($)` <- as.numeric(gsub(",","",alcohol$`Total Cost($)`))
+alcohol$`Cost Per Capital($)` <- as.numeric(gsub(",","",alcohol$`Cost Per Capital($)`))
+# alcohol
+# write.csv(alcohol, file = "alcohol.csv")
+```
+
+```{r}
+sugar2 <- read_html("https://www.cdc.gov/mmwr/volumes/65/wr/mm6507a1.htm#T2_down") %>%
+  html_nodes("table") %>%
+  html_table(fill=TRUE) %>%
+  .[2] %>%
+  data.frame()
+
+colnames(sugar2) <- sugar2[2,]
+sugar2 <- sugar2[c(-1,-2,-3),]
+sugar2$`18–24` <- as.numeric(sapply(unlist(sugar2$`18–24`),substr,1,4))
+sugar2$`25–34` <- as.numeric(sapply(unlist(sugar2$`25–34`),substr,1,4))
+sugar2$`35–54` <- as.numeric(sapply(unlist(sugar2$`35–54`),substr,1,4))
+sugar2$`≥55` <- as.numeric(sapply(unlist(sugar2$`≥55`),substr,1,4))
+sugar2$Male <- as.numeric(sapply(unlist(sugar2$Male),substr,1,4))
+sugar2$Female <- as.numeric(sapply(unlist(sugar2$Female),substr,1,4))
+sugar2$`White, Non-Hispanic` <- as.numeric(sapply(unlist(sugar2$`White, Non-Hispanic`),substr,1,4))
+sugar2$`Black, Non-Hispanic` <- as.numeric(sapply(unlist(sugar2$`Black, Non-Hispanic`),substr,1,4))
+sugar2$Hispanic <- as.numeric(sapply(unlist(sugar2$Hispanic),substr,1,4))
+sugar2$`Other, Non-Hispanic` <- as.numeric(sapply(unlist(sugar2$`Other, Non-Hispanic`),substr,1,4))
+sugar2$`No. respondents` <- as.numeric(gsub(",","",sugar2$`No. respondents`))
+# sugar2
+# write.csv(sugar2, file = "sugar2.csv")
+```
+
+```{r}
+sugar3 <- read_html("https://www.cdc.gov/mmwr/volumes/65/wr/mm6507a1.htm#T3_down") %>%
+  html_nodes("table") %>%
+  html_table(fill=TRUE) %>%
+  .[3] %>%
+  data.frame()
+
+colnames(sugar3) <- sugar3[2,]
+sugar3 <- sugar3[c(-1,-2,-3),]
+sugar3$Employed <- as.numeric(sapply(unlist(sugar3$Employed),substr,1,4))
+sugar3$`Not employed` <- as.numeric(sapply(unlist(sugar3$`Not employed`),substr,1,4))
+sugar3$Retired <- as.numeric(sapply(unlist(sugar3$`Not employed`),substr,1,4))
+sugar3$`<High school` <- as.numeric(sapply(unlist(sugar3$`<High school`),substr,1,4))
+sugar3$`High school` <- as.numeric(sapply(unlist(sugar3$`High school`),substr,1,4))
+sugar3$`Some college` <- as.numeric(sapply(unlist(sugar3$`Some college`),substr,1,4))
+sugar3$`College graduate` <- as.numeric(sapply(unlist(sugar3$`College graduate`),substr,1,4))
+sugar3$`No. respondents` <- as.numeric(gsub(",","",sugar3$`No. respondents`))
+# sugar3
+# write.csv(sugar3, file = "sugar3.csv")
+```
+
 
 ####Read in Raw Data
 ```{r}
@@ -64,6 +147,7 @@ GDP2015 <- read.csv("data(raw)/2015.csv",skip = 4)
 GDP2016 <- read.csv("data(raw)/2016.csv", skip = 4)
 mcdonald <- read.xls("data(raw)/mcdonald.xlsx")
 ```
+
 
 ####Basic Data Cleaning
 
@@ -108,9 +192,9 @@ alcohol <- alcohol %>%
   mutate(Num.Drink = Total.Cost.../Cost.Per.Drink...)
 names(alcohol)[1] <- "State"
 
-names(sugar1) <- c("State","No.","18-24","25-34","35-54",">55","Male","Female","White","Black","Hispanic","Other")
-names(sugar2) <- c("State","No.","Employed","Unemployed","Retired","<HighSchool","HighSchool","College","College.Grad")
-names(sugar3) <- c("State","ResNumber","None","Ls1perDay","Gr1perDay")
+names(sugar1) <- c("State","No.","18-24","25-34","35-54","55+","Male","Female","White","Black","Hispanic","Other")
+names(sugar2) <- c("State","No.","Employed","Unemployed","Retired","underHighSchool","HighSchool","College","College.Grad")
+names(sugar3) <- c("State","ResponseNum","NoSweetBev","less1perDay","more1perDay")
 #sugar3
 
 SweetBev <- full_join(sugar1,sugar2,by="State")
@@ -149,7 +233,7 @@ names(mcdonald) <- c("State","Rank","McNumber")
 
 ```{r}
 ms <- Indicators %>% select(1,3,6) %>% spread(Type, Percentage)
-ms1 <- full_join(full_join(full_join(ms,Age,by="State"),education,by="State"),sugar3%>%select(1,3,4,5),by="State")
+ms1 <- full_join(full_join(full_join(full_join(ms,Age,by="State"),education,by="State"),sugar3%>%select(1,3,4,5),by="State"), mcdonald, by="State")
 # ms1 #dataframe of all indicators with percentage values
 # 
 # Indicators
@@ -160,7 +244,7 @@ ms1 <- full_join(full_join(full_join(ms,Age,by="State"),education,by="State"),su
 # 
 # sugar3
 
-ms2 <- full_join(mcdonald,alcohol%>%select(1,5),by="State")
+# ms2 <- full_join(mcdonald,alcohol%>%select(1,5),by="State")
 # ms2 #dataframe of indicators with exact number (mc+alcohol)
 # 
 # mcdonald
@@ -175,13 +259,24 @@ ms2 <- full_join(mcdonald,alcohol%>%select(1,5),by="State")
 
 ##IV. Analysis of missing values
 
+Do we have missing values for datasets that involving all the variables?
+
+```{r}
+colSums(is.na(ms1))
+```
+
+```{r}
+extracat::visna(ms1, sort="b")
+```
+
+Yes, we do. Here, we visualized missing patterns using the visna function in the extracat package. From above plot, we realized that there are 5 missing patterns by each row, and most columns have some kinds of missing values. By sorting both rows and columns, sweet beverage consumption related variables (NoSweetBev, less1perDay, more1perDay) have the most missing values, and we observed the top two most common missing patterns.
+
+
 ```{r}
 #heatmap(1 * is.na(ms1), Rowv = NA, Colv = NA)
 #ms1
 image(missing_data.frame(ms1))
 #extracat::visna(ms1)
-image(missing_data.frame(ms2))
-#ms1
 ```
 
 **Dealing with missing values**
