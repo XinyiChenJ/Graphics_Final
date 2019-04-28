@@ -1,9 +1,11 @@
 ---
 title: "Graphics Project"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
-```{r}
+```{r,include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
 knitr::opts_chunk$set(message =  FALSE)
@@ -81,7 +83,7 @@ clean2 <- function(df1){
 ```{r}
 Smoking <- clean(Sn,Sp)
 Smoking$Type <- rep("Smoking",nrow(Smoking))
-Smoking
+#Smoking
 
 Obesity <- clean(Op, On)
 Obesity$Type <- rep("Obesity",nrow(Obesity))
@@ -109,7 +111,7 @@ names(alcohol)[1] <- "State"
 names(sugar1) <- c("State","No.","18-24","25-34","35-54",">55","Male","Female","White","Black","Hispanic","Other")
 names(sugar2) <- c("State","No.","Employed","Unemployed","Retired","<HighSchool","HighSchool","College","College.Grad")
 names(sugar3) <- c("State","ResNumber","None","Ls1perDay","Gr1perDay")
-sugar3
+#sugar3
 
 SweetBev <- full_join(sugar1,sugar2,by="State")
 SweetBev <- SweetBev[!duplicated(as.list(SweetBev))]
@@ -141,33 +143,33 @@ Indicators <- rbind(Smoking,Obesity,Poor_Health,Num, Inactivity,Hypertension, Ch
 Indicators$Type <- as.factor(Indicators$Type)
 mcdonald <- mcdonald %>% select(State, Rank, No..of.Mcdonald.s.locations)
 names(mcdonald) <- c("State","Rank","McNumber")
-mcdonald
+#mcdonald
 ```
 
 
 ```{r}
 ms <- Indicators %>% select(1,3,6) %>% spread(Type, Percentage)
 ms1 <- full_join(full_join(full_join(ms,Age,by="State"),education,by="State"),sugar3%>%select(1,3,4,5),by="State")
-ms1 #dataframe of all indicators with percentage values
-
-Indicators
-
-Age
-
-education
-
-sugar3
+# ms1 #dataframe of all indicators with percentage values
+# 
+# Indicators
+# 
+# Age
+# 
+# education
+# 
+# sugar3
 
 ms2 <- full_join(mcdonald,alcohol%>%select(1,5),by="State")
-ms2 #dataframe of indicators with exact number (mc+alcohol)
-
-mcdonald
-
-alcohol
-
-GDP2015
-
-GDP2016
+# ms2 #dataframe of indicators with exact number (mc+alcohol)
+# 
+# mcdonald
+# 
+# alcohol
+# 
+# GDP2015
+# 
+# GDP2016
 ```
 
 
@@ -179,7 +181,7 @@ GDP2016
 image(missing_data.frame(ms1))
 #extracat::visna(ms1)
 image(missing_data.frame(ms2))
-ms1
+#ms1
 ```
 
 **Dealing with missing values**
@@ -187,6 +189,14 @@ ms1
 ###Minor Risk Factors
 
 **Dot Plots(Facet-wrap)**
+```{r}
+df_percent <- na.omit(ms1[,1:8][order(ms1$Num,decreasing = T),])
+df_percent <- df_percent %>% 
+  filter(State != "Median of States") %>% 
+  mutate(Rank = c(1:51))
+#df_percent
+```
+
 ```{r}
 df_num <- gather(df_percent,key = "Type", value = "Percent", colnames(df_percent%>%select(2:4,6:8)))
 #df_num
@@ -198,13 +208,6 @@ ggplot(df_num%>%filter(State != "Puerto Rico"),aes(x=Num, y=Percent))+geom_point
 ```
 
 **Parallel Coordinates Plot**
-```{r}
-df_percent <- na.omit(ms1[,1:8][order(ms1$Num,decreasing = T),])
-df_percent <- df_percent %>% 
-  filter(State != "Median of States") %>% 
-  mutate(Rank = c(1:51))
-#df_percent
-```
 
 ```{r}
 df_all <- gather(df_percent,key = "RiskFactor", value = "Percent", colnames(df_percent%>%select(2:8)))
@@ -220,11 +223,11 @@ g1+theme(axis.text.x = element_text(angle = 90))+xlab("Risk Factor")
 
 
 ```{r}
-Age <- na.omit(Age[-1,])
-full_join(Age, Num)%>%select(1:5,7)
-df_age <- gather(Age, key = "Age", value = "Percent", colnames(Age%>%select(2:5)))
-df_age
-ggparcoord(df_age, columns = 3, groupColumn = 2)
+# Age <- na.omit(Age[-1,])
+# full_join(Age, Num)%>%select(1:5,7)
+# df_age <- gather(Age, key = "Age", value = "Percent", colnames(Age%>%select(2:5)))
+# df_age
+# ggparcoord(df_age, columns = 3, groupColumn = 2)
 ```
 
 
