@@ -19,6 +19,7 @@ require(gdata)
 library(tidyverse)
 library(rvest)
 library(vcd)
+library(ggthemes)
 ```
 
 ##I. Introduction
@@ -238,7 +239,7 @@ postH <- clean2(postH)
 names(postH) <- c("State","PostHighSchool")
 education <- full_join(full_join(underH,H,by="State"),postH,by="State")
 
-education
+#education
 
 
 age1 <- clean2(age1)
@@ -252,7 +253,7 @@ names(age4) <- c("State","75+")
 Age <- full_join(full_join(full_join(age1,age2,by="State"),age3, by="State"),age4,by="State")
 
 Major <- full_join(education,Age,by="State")
-Major
+#Major
 ```
 
 *Other Factors: GDP*
@@ -275,7 +276,7 @@ load("GDP.RData")
 ```{r}
 ms <- Indicators %>% select(1,3,6) %>% spread(Type, Percentage)
 missingV <- full_join(full_join(full_join(full_join(ms,Age,by="State"),education,by="State"),SweetBev,by="State"), mcdonald%>%select(1,3), by="State")
-missingV
+#missingV
 ```
 
 
@@ -297,7 +298,7 @@ Yes, we do. Here, we visualized missing patterns using the visna function in the
 ```{r}
 #heatmap(1 * is.na(ms1), Rowv = NA, Colv = NA)
 #ms1
-image(missing_data.frame(missingV))
+#image(missing_data.frame(missingV))
 #extracat::visna(ms1)
 ```
 
@@ -328,7 +329,7 @@ df_percent <- na.omit(ms[,1:8][order(ms$Num),])
 df_percent <- df_percent %>% 
   filter(State != "Median of States" & State != "Guam" & State != "Puerto Rico") %>% 
   mutate(Rank = c(1:49))
-df_percent
+#df_percent
 ```
 
 
@@ -356,16 +357,18 @@ Idea: approximately all proportion of risk factors increases as proportion of di
 ```{r}
 df_all <- gather(df_percent,key = "RiskFactor", value = "Percent", colnames(df_percent%>%select(2:8)))
 #df_all
-temp <- df_all %>% group_by(RiskFactor) %>%
-  mutate(Percent = scales::rescale(Percent)) %>% ungroup()
-#temp
 
-g1 <- ggplot(temp%>%filter(State != "Puerto Rico"), aes(x = reorder(State,Rank), y = Percent,group=RiskFactor,col=RiskFactor)) + 
-  geom_line(alpha = .5) + ggtitle("Diagnosed Diabetes and Risk Factors")
-g1+theme(axis.text.x = element_text(angle = 90))+xlab("Risk Factor")
+ggplot(df_all[df_all$RiskFactor!="Num",],aes(x=RiskFactor,y=Percent,fill=RiskFactor))+geom_dotplot(binaxis = "y",stackdir = "center",alpha=0.6,col="white")
+# temp <- df_all %>% group_by(RiskFactor) %>%
+#   mutate(Percent = scales::rescale(Percent)) %>% ungroup()
+# #temp
+# 
+# g1 <- ggplot(temp%>%filter(State != "Puerto Rico"), aes(x = reorder(State,Rank), y = Percent,group=RiskFactor,col=RiskFactor)) + 
+#   geom_line(alpha = .5) + ggtitle("Diagnosed Diabetes and Risk Factors")
+# g1+theme(axis.text.x = element_text(angle = 90))+xlab("Risk Factor")
 ```
 
-From Parllel Coordinate Plot, we can see the trend more clear.
+From DotPlot, we can see the percentage distribution. 
 
 **Major Risk Factors**
 *Age,Education, Life(Eating Habits)*
@@ -400,7 +403,8 @@ ggplot(df_edu,aes(x=percent,y=reorder(State,Rank),color=edu_level,label = percen
   geom_text(aes(color = edu_level), size = 3)+
   theme(legend.position = "top")+
   ylab("State")+
-  ggtitle("Education Level in each State (ordered by Number of Diabetes)")
+  ggtitle("Education Level in each State (ordered by Number of Diabetes)")+
+  theme_minimal()
 ```
 
 idea: 非常明显，学历越低的群体越多人患病，可能由于不注意健身，饮食习惯不佳等。接着往下看饮食习惯是否会影响。
@@ -408,10 +412,10 @@ idea: 非常明显，学历越低的群体越多人患病，可能由于不注�
 *excessive alcohol*
 
 ```{r}
-alcohol
+#alcohol
 df_alcohol <-merge(alcohol %>% select(1,5),df_percent%>%select(1,9))
-df_alcohol
-ggplot(df_alcohol)+geom_bar(aes(x=reorder(State,Rank),y=Num.Drink.per.Capita,fill=-Rank),stat = "identity")+coord_flip()
+#df_alcohol
+ggplot(df_alcohol,aes(x=reorder(State,Rank),y=Num.Drink.per.Capita))+geom_bar(fill="darkred",alpha=0.6,stat = "identity")+coord_flip()+ theme_igray()
 ```
 
 Idea: No clear pattern or trend but approximately number of excessive drinks per capita increases as number of diagnosed diabetes increases. 非常weird超出想象但是在查阅资料后发现过量饮酒确实有可能导致血糖降低，但这并不代表过量饮酒能够帮助缓解糖尿病。只是酒的量与种类有关。接下来看beer的影响。
@@ -420,13 +424,122 @@ Idea: No clear pattern or trend but approximately number of excessive drinks per
 *Fast Fried/oily food (eg. Mcdonald's)*
 
 ```{r}
-mcdonald
-df_percent %>% select(1,9)
-
-ggplot(merge(df_percent %>%select(1,9),mcdonald%>%select(1,3),by="State"))+geom_bar(aes(x=reorder(State,Rank),y=McDonald.s.per.1M),stat="identity")+coord_flip()
+#mcdonald
+#df_percent %>% select(1,9)
+ggplot(merge(df_percent %>%select(1,9)%>%filter(State != "Tennessee"&State!="Florida"),mcdonald%>%select(1,3),by="State"))+
+  geom_point(aes(x=reorder(State,Rank),y=McDonald.s.per.1M),stat="identity",col="purple",alpha = 0.5, size = 4)+
+  coord_flip()+
+  xlab("State")+
+  ylab("Number of McDonald/million people")+
+  ggtitle("Number of McDonald per Million People in each State")+
+  theme_minimal()
 ```
 
 IDEA: 看起来有pattern了 但是可能会换一种图画，可以试试看。
+
+```{r}
+
+mo_df <- merge(EatHab,df_percent%>%select(1,5,9),by="State")
+# mo_df$NoSweetBev <- ifelse(mo_df$NoSweetBev < 25, "15~24",ifelse(mo_df$NoSweetBev >=25 & mo_df$NoSweetBev <35, "25~34","35+"))
+# mo_df$less1perDay <- ifelse(mo_df$less1perDay < 40, "35~40",ifelse(mo_df$less1perDay >=40 & mo_df$less1perDay <45, "40~44","45+"))
+# 
+# mo_df$more1perDay <- ifelse(mo_df$more1perDay < 25, "15~24",ifelse(mo_df$more1perDay >=25 & mo_df$more1perDay <35, "25~34",ifelse(mo_df$more1perDay >=35 & mo_df$more1perDay <45,"35~44","45+")))
+
+mo_df$Num.Drink.per.Capita <- ifelse(mo_df$Num.Drink.per.Capita < 300, "200+",ifelse(mo_df$Num.Drink.per.Capita >=300 & mo_df$Num.Drink.per.Capita <400, "300+","400+"))
+
+mo_df$McDonald.s.per.1M <- ifelse(mo_df$McDonald.s.per.1M < 45, "35~44",ifelse(mo_df$McDonald.s.per.1M >=45 & mo_df$McDonald.s.per.1M <55, "45~54",ifelse(mo_df$McDonald.s.per.1M >=55 & mo_df$McDonald.s.per.1M <65,"55~64","65+")))
+
+mo_df$Rank <- ifelse(mo_df$Rank <= 10, "Bottom10",ifelse(mo_df$Rank >10 & mo_df$Rank <=20, "30-40",ifelse(mo_df$Rank >=20 & mo_df$Rank <30,"20~30",ifelse(mo_df$Rank >=30 & mo_df$Rank <40,"10~20","Top10"))))
+
+mosaic(McDonald.s.per.1M~Rank, 
+       gp = gpar(fill = c("salmon", "lightblue"),col = "white",alpha=0.85),spacing = spacing_equal(sp = unit(0.2, "lines")), labeling = labeling_border(rot_labels = c(0, 0, 0, 45)),mo_df)
+
+
+
+```
+
+*Sweet Beverage*
+```{r}
+SweetBev[,2:4] <- apply(SweetBev[2:4],2,ceiling)
+#SweetBev
+SB <- merge(SweetBev,df_percent%>%select(1,9),by="State")
+A <- gather(SB,key = "Freq",value = "Percent",colnames(SweetBev)[2:4])
+#A
+# ls <- list()
+# ls2 <- list()
+# for (i in 1:72) {
+#   ls[i] <- list(rep(A$Freq[i],A$Percent[i]))
+#   ls2[i] <- list(rep(as.character(A$SweetBev.State[i]),A$Percent[i]))
+# }
+# 
+# cat_bev <- data.frame("State"=unlist(ls2),"BevFreq"= unlist(ls))
+# cat_bev$BevFreq <- as.character(cat_bev$BevFreq)
+#ggplot(A,aes(x=Freq,y=Percent,fill=factor(Freq)))+geom_dotplot(binaxis = "y",stackdir = "center")
+```
+
+```{r}
+ggplot(A)+geom_point(aes(x=reorder(State,Rank),y=Percent,col=Freq),alpha = 0.5, size = 4)+coord_flip()+ylab("Percent")+xlab("State(ordered by number of diabetes)")+ggtitle("State vs. Sweet Beverage Consumption")
+```
+
+
+
+
+```{r}
+
+#mo_df
+df_eat <- merge(EatHab,df_percent%>%select(1,5,9),by="State")
+
+df_eat <- gather(df_eat, key = "RiskFactor", value = "Percent",colnames(df_eat%>%select(2:4,7)))
+#df_eat
+temp <- df_eat %>% group_by(RiskFactor) %>%
+  mutate(Percent = scales::rescale(Percent)) %>% ungroup()
+
+g1 <- ggplot(temp%>%filter(State != "Puerto Rico"), aes(x = reorder(State,Rank), y = Percent,group=RiskFactor,col=RiskFactor)) + 
+  geom_line(alpha = .5) + ggtitle("Diagnosed Diabetes and Risk Factors")
+g1+theme(axis.text.x = element_text(angle = 90))+xlab("Risk Factor")
+
+
+
+#ggparcoord(mo_df[order(mo_df$Rank),],columns = 2:4, scale = "globalminmax", groupColumn = 8)
+```
+
+IDEA: state 是按照diabetes数量由大到小排列。很明显生病人数越多的州，NoSweetBev 和 less1perDay 越多，more1perDay越多。
+
+
+
+GDP
+
+```{r}
+df_gdp <- merge(GDP,df_percent%>%select(1,9)%>%filter(State!="District of Columbia"),by="State")
+df_gdp$Diabetes_Rank <- ifelse(df_gdp$Rank <= 10, "Bottom10",ifelse(df_gdp$Rank >10 & df_gdp$Rank <=40, "Middle","Top10"))
+#df_gdp
+ggplot(df_gdp)+geom_point(aes(x=reorder(State,Rank),y=GDP2015,col=Diabetes_Rank))+coord_flip()+xlab("State(ordered by number of diabetes)")
+```
+
+IDEA: overall trend来说，GDP越高得病的人越少。
+Diabetes_Rank是得病人数的rank排列，越高得病的人越多。Top10就是最多的州。很明显前十的GDP都不咋样。
+
+
+```{r,message=FALSE}
+#merge(df_gdp,EatHab%>%select(1:4,6),by="State")
+
+ggpairs(merge(df_gdp,EatHab%>%select(1:4,6),by="State"),columns = c(2,5:8),
+  mapping=ggplot2::aes(colour = Diabetes_Rank,alpha=0.6))
+```
+
+GDP和Eating Habits（fastfood, beer,sweetbev）的关系图，GDP越高，麦当劳越少，喝甜饮料的越少，因此饮食习惯好了，得病就少。反之就多。
+
+
+```{r}
+B <- gather(merge(df_gdp,education,by="State"),key = "EDU",value = "Percent",colnames(merge(df_gdp,education,by="State"))[5:7])
+merge(df_gdp,education,by="State")
+ggplot(B,aes(x=GDP2015,y=Percent))+geom_point(aes(col=EDU))+geom_smooth(method = "lm",col="orange",size=0.7)
+ggpairs(merge(df_gdp,education,by="State"),columns = c(2,5:7),
+  mapping=ggplot2::aes(colour = Diabetes_Rank,alpha=0.6))
+```
+
+IDEA:GDP越高,得病人数越少，学历越高他们之间的correlation绝对值越高，即更加负相关。
+
 
 ##V. Results
 ```{r}
