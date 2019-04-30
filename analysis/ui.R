@@ -107,6 +107,9 @@ navbarPage("Diabetes in the US",id='map1',
                     p("People living in states with higher GDP or have well education background are more likely to possess
                       acute awareness of keeping fit, have a balanced diet and less likely to become overweighted."),
                     
+                    h4("About:"),
+                    p("Team Members: ","Xinyi Chen, ","Yifei Bi"),
+                    p("Statistical Graphics, ","Columbia University"),
                     h4("Reference"),
                     a(href="https://www.bea.gov/", "Bureau of Economic Analysis"),
                     br(),

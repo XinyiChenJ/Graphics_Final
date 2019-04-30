@@ -288,8 +288,8 @@ shinyServer(function(input, output,session) {
       geom_point(aes(x=reorder(State,Rank),y=McDonald.s.per.1M),stat="identity",col="purple",alpha = 0.5, size = 4)+
       coord_flip()+
       xlab("State")+
-      ylab("Number of McDonald/million people")+
-      ggtitle("Number of McDonald per Million People in each State")+
+      ylab("Number of McDonald's/million people")+
+      ggtitle("Number of McDonald's per Million People in each State")+
       theme_minimal()
     
     if(input$MC=="Show Trend"){
