@@ -3,6 +3,7 @@ title: "Graphics Project"
 output:
   html_document:
     df_print: paged
+    code_folding: hide
 ---
 
 ```{r,include=FALSE}
@@ -23,6 +24,13 @@ library(ggthemes)
 ```
 
 ##I. Introduction
+
+<br>
+  As is well known, diabetes is a chronic (long-lasting) health condition that affects how your body turns food into energy. It causes more deaths per year than breast cancer and AIDS combined, and people with diabetes are at increased risk of serious health complications including premature death, vision loss, heart disease, stroke, kidney failure, and amputation of toes, feet, or legs.<br>
+<br>
+  Although it is truly can be treated as a severe disease and worth people's attention. However, according to *National Diabetes Statistics Report*, about 7.2 million (23.8%) adults in the US were not aware of or did not report having diabetes.Thus, we want to do some research and analysis about this disease to see what are the main reasons for causing diabetes and if what can we do for controling and preventing from it.<br>
+  
+![](../data(raw)/DB.jpg){width=600px}
 
 ##II. Description of the data source
 
@@ -53,9 +61,13 @@ https://apps.bea.gov/itable/iTable.cfm?ReqID=70&step=1#reqid=70&step=1&isuri=1 <
 
 ##III. Description of data import / cleaning / transformation
 
-For the parts of data that directly downloading excel or csv from orginial websites, we used read.csv() to import into R for further data processing. Those data are including High Cholesterol, Hypertension, Inactivity, Obesity, Poor Health, Smoking, age, education, per capita GDP and number of McDonald's location.
-
-On the other part of data that does not have nice downloadable excel or csv, we used packages tidyverse and rvest to scrap tables from webpages and saved those tables into our .data/raw in .csv format. Those data include alcohol and sweet beverage consumption. In alcohol data frame, we renamed each column as Location, Total Cost, Cost Per Drink, Cost Per Capital respectively. In sweet beverage consumption data frame, we scraped two tables from one web page. After we checked each list item, it turns out that the tables we want are the second and third list elements: one is sweetened beverage consumption that are further specified by different ages, genders, races; the other is sweetened beverage consumption that are further specified by different employment status and education levels. Column names are taken into consideration to define each variable, and we removed the rows we don’t need. All numeric related data are cleaned from character form to numeric or integer form for being ready to later analysis.
+For the parts of data that directly downloading excel or csv from orginial websites, we used read.csv() to import into R for further data processing. Those data are including High Cholesterol, Hypertension, Inactivity, Obesity, Poor Health, Smoking, age, education, per capita GDP and number of McDonald's location. 
+<br>
+<br>
+On the other part of data that does not have nice downloadable excel or csv, we used packages tidyverse and rvest to scrap tables from official webpages and saved those tables into our .data/raw in .csv format. Those data include alcohol and sweet beverage consumption. 
+<br>
+<br>
+We mainly used pipeline operator methods like *select*, *filter*, to clean up the dataset and just leave the necessary part and also rename the columns with meaningful names. For some plots, we also need to narrow the dataset using *gather* or categorize numerical data into several categorical groups. All numeric related data are cleaned from character or factor type to double or integer form for being ready to later analysis.
 
 
 ####Scraping data from webpages
@@ -277,7 +289,7 @@ Do we have missing values for datasets that involving all the variables?
 ```
 
 ```{r}
-#extracat::visna(missingV, sort="b")
+extracat::visna(missingV, sort="b")
 ```
 
 Yes, we do. Here, we visualized missing patterns using the visna function in the extracat package. From above plot, we realized that there are 8 missing patterns by each row, and most columns have some kinds of missing values. By sorting both rows and columns, sweet beverage consumption related variables (NoSweetBev, less1perDay, more1perDay) have the most missing values, and we observed the top two most common missing patterns.
@@ -285,7 +297,7 @@ Yes, we do. Here, we visualized missing patterns using the visna function in the
 
 **Dealing with missing values and Save as RData for convenience**
 
-For those States with low population like Virginia Island, Hawaii, we just simply eliminate those data from the dataframe for reducing the effects of potential outliers. However, for data as Sweet Beverage, we were only able to find the data for 24 states, which caused a lot of missing values compared with other datasets have 50+ states. Hence, the only we of dealing with this kind of situation was to separate it from the whole big dataset in case it affect other analysis.
+For those States with low population like Virginia Island, Hawaii, we just simply eliminate those data from the dataframe for reducing the effects of potential outliers. However, for data as Sweet Beverage, we were only able to find the data for 24 states, which caused a lot of missing values compared with other datasets have 50+ states. Hence, the only way of dealing with this kind of situation was to separate it from the whole big dataset in case it affects other analysis.
 
 
 ##V. Results
@@ -314,7 +326,7 @@ df_num <- gather(df_percent,key = "Type", value = "Percent", colnames(df_percent
 ```{r}
 ###Plot
 
-ggplot(df_num%>%filter(State != "Puerto Rico"),aes(x=Num, y=Percent))+geom_point() + facet_wrap(~ Type)+ggtitle("Diagnosed Diabetes vs. Potential Risk Factors") + xlab("Diagnosed Diabetes")
+ggplot(df_num%>%filter(State != "Puerto Rico"),aes(x=Num, y=Percent))+geom_point() + facet_wrap(~ Type)+ggtitle("Diagnosed Diabetes vs. Potential Risk Factors") + xlab("Diagnosed Diabetes")+theme_gray(16)
 ```
 
 Six potential minor risk factors above approximately show existing positively correlation with diagnosed Diabetes. Even though High Cholesterol and Smoking slightly increase as proportion of diagnosed diabetes increases, the rest factors including Hypertension, Inactivity, Obesity and poor health are all showing a growing trend, which tells us that as proportion of diagnosed diabetes increases, the proportion of those risk factors increase as well. Therefore, these minor risk factors do have influences on causing diabetes to some degree in the long run.
@@ -325,7 +337,7 @@ Six potential minor risk factors above approximately show existing positively co
 ```{r}
 df_all <- gather(df_percent,key = "RiskFactor", value = "Percent", colnames(df_percent%>%select(2:8)))
 #df_all
-ggplot(df_all[df_all$RiskFactor!="Num",],aes(x=RiskFactor,y=Percent,fill=RiskFactor))+geom_dotplot(binaxis = "y",stackdir = "center",alpha=0.6,col="white",binwidth = 2)+ggtitle("Risk Factor Percentage of Diabetes")
+ggplot(df_all[df_all$RiskFactor!="Num",],aes(x=RiskFactor,y=Percent,fill=RiskFactor))+geom_dotplot(binaxis = "y",stackdir = "center",alpha=0.6,col="white",binwidth = 2)+ggtitle("Risk Factor Percentage of Diabetes")+theme_gray(13)
 # temp <- df_all %>% group_by(RiskFactor) %>%
 #   mutate(Percent = scales::rescale(Percent)) %>% ungroup()
 # #temp
@@ -353,7 +365,7 @@ df_age <- gather(Age, key = "Age", value = "Percent", colnames(Age%>%select(2:5)
 #df_age
 df_age1 <- df_age %>% spread(State, Percent)
 #df_age1
-ggparcoord(df_age1, columns = 2:49, scale = "globalminmax", groupColumn = 1)+theme(axis.text.x = element_text(angle = 90))+xlab("State")+ylab("Percentage")+ggtitle("Age Distribution in Each State")
+ggparcoord(df_age1, columns = 2:49, scale = "globalminmax", groupColumn = 1)+xlab("State")+ylab("Percentage")+ggtitle("Age Distribution in Each State")+theme_gray(16)+theme(axis.text.x = element_text(angle = 90))
 ```
 
 In this parallel coordinate plot of age, each color line represents a specific age range, and each age range that having diabetes takes percentage from total diabetes in that state. It clearly shows that the percentage of being diabetes increases as age increases. Population in age 18-44 with diabetes have very low percentage (below 5%) on total diabetes and less fluctuation in each state. Over 45, proportion of diabetes becomes very fluctuant that really depending on states. Most states' diabetes population with 45-64 age are within 10% - 20%. The highest percentage of diabetes are located in age over 65, particularly between 65-74. This makes sense since the metabolic function of the pancreas becomes degenerated as age increases, which triggers the higher possibility to have diabetes. In addition, Missisippi has higher percentage to have diabetes in each age range compared to other states, specially between age 45-74; however Colorado has lower proportion of diabetes compared to other states in older age.
@@ -453,7 +465,7 @@ A <- gather(SB,key = "Freq",value = "Percent",colnames(SweetBev)[2:4])
 ```
 
 ```{r}
-ggplot(A)+geom_point(aes(x=reorder(State,Rank),y=Percent,col=Freq),alpha = 0.7, size = 4)+coord_flip()+ylab("Percent")+xlab("State(ordered by number of diabetes)")+ggtitle("State vs. Sweet Beverage Consumption")+theme_cleveland()
+ggplot(A)+geom_point(aes(x=reorder(State,Rank),y=Percent,col=Freq),alpha = 0.7, size = 4)+coord_flip()+ylab("Percent")+xlab("State(ordered by number of diabetes)")+ggtitle("State vs. Sweet Beverage Consumption")
 ```
 
 Does drinking sweet beverages increases the possibility of diabetes? The above cleveland dot plot giving the answer is Yes. When the states have larger amount of diabetes, the lower percentage people do not drink sweet beverage at all and higher percentage people drink more than 1 per day. In other words, percentage of more than 1 per day (green dots) increases as the state's number of diabetes increases; percentages of less than 1 per day and no sweet beverage decreases as the state's number of diabetes increases. We believe that sweet beverage consumption does cause diabetes. Let's see another plot to ensure this result.
@@ -472,7 +484,7 @@ temp <- df_eat %>% group_by(RiskFactor) %>%
 
 g1 <- ggplot(temp%>%filter(State != "Puerto Rico"), aes(x = reorder(State,Rank), y = Percent,group=RiskFactor,col=RiskFactor)) + 
   geom_line() + ggtitle("Diagnosed Diabetes and Risk Factors")
-g1+theme_economist()+theme(axis.text.x = element_text(angle = 90))+xlab("States")
+g1+theme_economist()+theme_gray(16)+theme(axis.text.x = element_text(angle = 90))+xlab("States")
 
 
 
@@ -495,7 +507,7 @@ ggplot(df_gdp)+geom_point(aes(x=reorder(State,Rank),y=GDP2015,col=Diabetes_Rank,
 Per Capita GDP is an important indicator of economic condition. With higher per capita GDP, it seems that people are more capable of improving life standard and preventing themselves from being diabetes. This dot pot displays three kinds of colors, blue dots representing top 10 states with largest number of diabetes, green dots representing middle states and red dots showing the bottom 10 states with smallest number of diabetes. It seems clear that the top 10 states has very low per capita GDP below 50000. The rest of states have relatively higher per capita GDP and fluctuant ranges. 
 
 
-```{r,message=FALSE}
+```{r,message=FALSE, fig.height=6, fig.width=6}
 #merge(df_gdp,EatHab%>%select(1:4,6),by="State")
 
 ggpairs(merge(df_gdp,EatHab%>%select(1:4,6),by="State"),columns = c(2,5:8),
