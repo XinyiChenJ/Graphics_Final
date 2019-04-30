@@ -119,34 +119,34 @@ sugar3$`No. respondents` <- as.numeric(gsub(",","",sugar3$`No. respondents`))
 
 ####Read in Raw Data
 ```{r}
-Sn <- read.csv("data(raw)/Sn.csv",skip = 2, na.strings = "No Data")
-Sp <- read.csv("data(raw)/Sp.csv",skip = 2, na.strings = "No Data")
-On <- read.csv("data(raw)/On.csv",skip = 2, na.strings = "No Data")
-Op <- read.csv("data(raw)/Op.csv",skip = 2, na.strings = "No Data")
-PGn <- read.csv("data(raw)/PGn.csv",skip = 2, na.strings = "No Data")
-PGp <- read.csv("data(raw)/PGp.csv",skip = 2, na.strings = "No Data")
-Dn <- read.csv("data(raw)/Dn.csv",skip = 2, na.strings = "No Data")
-Dp <- read.csv("data(raw)/Dp.csv",skip = 2, na.strings = "No Data")
-Phn <- read.csv("data(raw)/Phn.csv",skip = 2, na.strings = "No Data")
-Php <- read.csv("data(raw)/Php.csv",skip = 2, na.strings = "No Data")
-Hypern <- read.csv("data(raw)/Hypern.csv",skip = 2, na.strings = "No Data")
-Hyperp <- read.csv("data(raw)/Hyperp.csv",skip = 2, na.strings = "No Data")
-HCn <- read.csv("data(raw)/HCn.csv",skip = 2, na.strings = "No Data")
-HCp <- read.csv("data(raw)/HCp.csv",skip = 2, na.strings = "No Data")
-alcohol <- read.csv("data(raw)/alcohol.csv")
-sugar1 <- read.csv("data(raw)/sugar2.csv")
-sugar2 <- read.csv("data(raw)/sugar3.csv")
-sugar3 <- read.csv("data(raw)/sugar1.csv")
-underH <- read.csv("data(raw)/<H.csv",skip = 2, na.strings = "No Data")
-H <- read.csv("data(raw)/H.csv",skip = 2, na.strings = "No Data")
-postH <- read.csv("data(raw)/>H.csv",skip = 2, na.strings = "No Data")
-age1 <- read.csv("data(raw)/18-44.csv",skip = 2, na.strings = "No Data")
-age2 <- read.csv("data(raw)/45-64.csv",skip = 2, na.strings = "No Data")
-age3 <- read.csv("data(raw)/65-74.csv",skip = 2, na.strings = "No Data")
-age4 <- read.csv("data(raw)/75+.csv",skip = 2, na.strings = "No Data")
-GDP2015 <- read.csv("data(raw)/2015.csv",skip = 4)
-GDP2016 <- read.csv("data(raw)/2016.csv", skip = 4)
-mcdonald <- read.xls("data(raw)/mcdonald.xlsx")
+Sn <- read.csv("../data(raw)/Sn.csv",skip = 2, na.strings = "No Data")
+Sp <- read.csv("../data(raw)/Sp.csv",skip = 2, na.strings = "No Data")
+On <- read.csv("../data(raw)/On.csv",skip = 2, na.strings = "No Data")
+Op <- read.csv("../data(raw)/Op.csv",skip = 2, na.strings = "No Data")
+PGn <- read.csv("../data(raw)/PGn.csv",skip = 2, na.strings = "No Data")
+PGp <- read.csv("../data(raw)/PGp.csv",skip = 2, na.strings = "No Data")
+Dn <- read.csv("../data(raw)/Dn.csv",skip = 2, na.strings = "No Data")
+Dp <- read.csv("../data(raw)/Dp.csv",skip = 2, na.strings = "No Data")
+Phn <- read.csv("../data(raw)/Phn.csv",skip = 2, na.strings = "No Data")
+Php <- read.csv("../data(raw)/Php.csv",skip = 2, na.strings = "No Data")
+Hypern <- read.csv("../data(raw)/Hypern.csv",skip = 2, na.strings = "No Data")
+Hyperp <- read.csv("../data(raw)/Hyperp.csv",skip = 2, na.strings = "No Data")
+HCn <- read.csv("../data(raw)/HCn.csv",skip = 2, na.strings = "No Data")
+HCp <- read.csv("../data(raw)/HCp.csv",skip = 2, na.strings = "No Data")
+alcohol <- read.csv("../data(raw)/alcohol.csv")
+sugar1 <- read.csv("../data(raw)/sugar2.csv")
+sugar2 <- read.csv("../data(raw)/sugar3.csv")
+sugar3 <- read.csv("../data(raw)/sugar1.csv")
+underH <- read.csv("../data(raw)/<H.csv",skip = 2, na.strings = "No Data")
+H <- read.csv("../data(raw)/H.csv",skip = 2, na.strings = "No Data")
+postH <- read.csv("../data(raw)/>H.csv",skip = 2, na.strings = "No Data")
+age1 <- read.csv("../data(raw)/18-44.csv",skip = 2, na.strings = "No Data")
+age2 <- read.csv("../data(raw)/45-64.csv",skip = 2, na.strings = "No Data")
+age3 <- read.csv("../data(raw)/65-74.csv",skip = 2, na.strings = "No Data")
+age4 <- read.csv("../data(raw)/75+.csv",skip = 2, na.strings = "No Data")
+GDP2015 <- read.csv("../data(raw)/2015.csv",skip = 4)
+GDP2016 <- read.csv("../data(raw)/2016.csv", skip = 4)
+mcdonald <- read.xls("../data(raw)/mcdonald.xlsx")
 ```
 
 
@@ -267,10 +267,10 @@ GDP <- GDP2015 %>% select(2,3)
 
 **Load Cleaned Data**
 ```{r}
-load("Indicators.RData")
-load("EatHab.RData")
-load("Major.RData")
-load("GDP.RData")
+load("../data(tidy)/Indicators.RData")
+load("../data(tidy)/EatHab.RData")
+load("../data(tidy)/Major.RData")
+load("../data(tidy)/GDP.RData")
 ```
 
 ```{r}
@@ -306,16 +306,16 @@ Yes, we do. Here, we visualized missing patterns using the visna function in the
 
 ```{r}
 # Indicators <- na.omit(Indicators)
-# save(Indicators,file = "Indicators.RData")
+# save(Indicators,file = "../data(tidy)/Indicators.RData")
 # #EatHab
-# save(EatHab,mcdonald,alcohol,SweetBev,file = "EatHab.RData")
+# save(EatHab,mcdonald,alcohol,SweetBev,file = "../data(tidy)/EatHab.RData")
 # 
-# Major <- na.omit(Age, education, Major[-1,])
+# Major <- na.omit(Major[-1,])
 # #Major
-# save(Age, education, Major,file = "Major.RData")
+# save(Age, education, Major,file = "../data(tidy)/Major.RData")
 # 
 # #GDP
-# save(GDP,file = "GDP.RData")
+# save(GDP,file = "../data(tidy)/GDP.RData")
 ```
 
 
@@ -399,6 +399,15 @@ Note: add % on y-axis.
 df_edu <- merge(na.omit(education[-c(1,53,54),]),df_percent %>% select(1,9),by="State")
 df_edu <- gather(df_edu,key = "edu_level",value = "percent",colnames(df_edu)[2:4])
 
+# save(df_edu,file = "../data(tidy)/EduP.RData")
+
+ggplot(df_edu)+geom_bar(aes(reorder(State,Rank),percent,fill=edu_level),stat = "identity",alpha=0.6)+
+  xlab("State")+
+  ylab("Percentage")+
+  ggtitle("Education Level in each State (ordered by Number of Diabetes)")+
+  coord_flip()+
+  theme_igray()
+
 ggplot(df_edu,aes(x=percent,y=reorder(State,Rank),color=edu_level,label = percent))+
   geom_text(aes(color = edu_level), size = 3)+
   theme(legend.position = "top")+
@@ -426,8 +435,10 @@ Idea: No clear pattern or trend but approximately number of excessive drinks per
 ```{r}
 #mcdonald
 #df_percent %>% select(1,9)
-ggplot(merge(df_percent %>%select(1,9)%>%filter(State != "Tennessee"&State!="Florida"),mcdonald%>%select(1,3),by="State"))+
-  geom_point(aes(x=reorder(State,Rank),y=McDonald.s.per.1M),stat="identity",col="purple",alpha = 0.5, size = 4)+
+MCplot <- merge(df_percent %>%select(1,9)%>%filter(State != "Tennessee"&State!="Florida"&State!="New Jersey"),mcdonald%>%select(1,3),by="State")
+save(MCplot,file = "../data(tidy)/MCplot.RData")
+ggplot(MCplot)+
+  geom_point(aes(x=reorder(State,Rank),y=McDonald.s.per.1M),stat="identity",col="purple",alpha = 0.5, size = 4)+geom_smooth(aes(x=reorder(State,Rank),y=McDonald.s.per.1M,group=1))+
   coord_flip()+
   xlab("State")+
   ylab("Number of McDonald/million people")+
@@ -464,21 +475,11 @@ SweetBev[,2:4] <- apply(SweetBev[2:4],2,ceiling)
 #SweetBev
 SB <- merge(SweetBev,df_percent%>%select(1,9),by="State")
 A <- gather(SB,key = "Freq",value = "Percent",colnames(SweetBev)[2:4])
-#A
-# ls <- list()
-# ls2 <- list()
-# for (i in 1:72) {
-#   ls[i] <- list(rep(A$Freq[i],A$Percent[i]))
-#   ls2[i] <- list(rep(as.character(A$SweetBev.State[i]),A$Percent[i]))
-# }
-# 
-# cat_bev <- data.frame("State"=unlist(ls2),"BevFreq"= unlist(ls))
-# cat_bev$BevFreq <- as.character(cat_bev$BevFreq)
-#ggplot(A,aes(x=Freq,y=Percent,fill=factor(Freq)))+geom_dotplot(binaxis = "y",stackdir = "center")
+A
 ```
 
 ```{r}
-ggplot(A)+geom_point(aes(x=reorder(State,Rank),y=Percent,col=Freq),alpha = 0.5, size = 4)+coord_flip()+ylab("Percent")+xlab("State(ordered by number of diabetes)")+ggtitle("State vs. Sweet Beverage Consumption")
+ggplot()+geom_point(data=A,aes(x=reorder(State,Rank),y=Percent,col=Freq),alpha = 0.5, size = 4)+coord_flip()+ylab("Percent")+xlab("State(ordered by number of diabetes)")+ggtitle("State vs. Sweet Beverage Consumption")
 ```
 
 
@@ -488,13 +489,18 @@ ggplot(A)+geom_point(aes(x=reorder(State,Rank),y=Percent,col=Freq),alpha = 0.5, 
 
 #mo_df
 df_eat <- merge(EatHab,df_percent%>%select(1,5,9),by="State")
-
+names(df_eat)[7] <- "NumberOfDiabetes"
 df_eat <- gather(df_eat, key = "RiskFactor", value = "Percent",colnames(df_eat%>%select(2:4,7)))
 #df_eat
 temp <- df_eat %>% group_by(RiskFactor) %>%
   mutate(Percent = scales::rescale(Percent)) %>% ungroup()
+temp <- temp%>%filter(State != "Puerto Rico")
 
-g1 <- ggplot(temp%>%filter(State != "Puerto Rico"), aes(x = reorder(State,Rank), y = Percent,group=RiskFactor,col=RiskFactor)) + 
+temp
+#save(temp,file = "../data(tidy)/Sbev.RData")
+
+
+g1 <- ggplot(temp%>%filter(RiskFactor=="NoSweetBev"|RiskFactor=="NumberOfDiabetes"), aes(x = reorder(State,Rank), y = Percent,group=RiskFactor,col=RiskFactor)) + 
   geom_line(alpha = .5) + ggtitle("Diagnosed Diabetes and Risk Factors")
 g1+theme(axis.text.x = element_text(angle = 90))+xlab("Risk Factor")
 
@@ -512,7 +518,7 @@ GDP
 ```{r}
 df_gdp <- merge(GDP,df_percent%>%select(1,9)%>%filter(State!="District of Columbia"),by="State")
 df_gdp$Diabetes_Rank <- ifelse(df_gdp$Rank <= 10, "Bottom10",ifelse(df_gdp$Rank >10 & df_gdp$Rank <=40, "Middle","Top10"))
-#df_gdp
+#save(df_gdp,file = "../data(tidy)/GDP_plot.RData")
 ggplot(df_gdp)+geom_point(aes(x=reorder(State,Rank),y=GDP2015,col=Diabetes_Rank))+coord_flip()+xlab("State(ordered by number of diabetes)")
 ```
 
@@ -542,18 +548,11 @@ IDEA:GDP越高,得病人数越少，学历越高他们之间的correlation绝对
 
 
 ##V. Results
-```{r}
 
-```
 
 ##VI. Interactive component
-```{r}
-
-```
 
 
 ##VII. Conclusion
-```{r}
 
-```
 
