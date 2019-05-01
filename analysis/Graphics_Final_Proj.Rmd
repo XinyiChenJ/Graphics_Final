@@ -88,13 +88,8 @@ extracat::visna(missingV, sort="b")
 ```
 
 Yes, we do. Here, we visualized missing patterns using the visna function in the extracat package. From above plot, we realized that there are 8 missing patterns by each row, and most columns have some kinds of missing values. By sorting both rows and columns, sweet beverage consumption related variables (NoSweetBev, less1perDay, more1perDay) have the most missing values, and we observed the top two most common missing patterns.
-<<<<<<< HEAD
 
 
-=======
-
-
->>>>>>> 1dcbc0aa4e7c43338cda49f94ff0a6820bf65684
 **Dealing with missing values and Save as RData for convenience**
 
 For those States with low population like Virginia Island, Hawaii, we just simply eliminated those data from the dataframe for reducing the effects of potential outliers. However, for data as Sweet Beverage, we were only able to find the data for 24 states, which caused a lot of missing values compared with other datasets have 50+ states. Hence, the only way of dealing with this kind of situation was to separate it from the whole big dataset in case that it affects other analysis.
@@ -130,13 +125,6 @@ ggplot(df_num%>%filter(State != "Puerto Rico"),aes(x=Num, y=Percent))+geom_point
 ```
 
 Six potential risk factors above approximately show existing positively correlation with diagnosed Diabetes. Even though proportion of Physical Inactivity and Smoking is under 50% in all diagnosed diabetes, the overall trend shows that they do increase as proportion of diabetes increases. <br>
-<<<<<<< HEAD
-The rest factors including Hypertension, High Cholesterol, Obesity and Poor General Health all showing a growing trend, which tells us that as proportion of diagnosed diabetes increases, the proportion of those risk factors increase as well. Therefore, all these risk factors do have influences on causing diabetes to some degree in the long run.<br>
-Now look at these factors using other graph pattern to get more information.
-
-**DotPlot**
-
-=======
 <br>
 The rest factors including Hypertension, High Cholesterol, Obesity and Poor General Health all showing a growing trend, which tells us that as proportion of diagnosed diabetes increases, the proportion of those risk factors increase as well. Therefore, all these risk factors do have influences on causing diabetes to some degree in the long run.<br>
 <br>
@@ -144,7 +132,6 @@ Now look at these factors using other graph pattern to get more information.
 
 **DotPlot**
 
->>>>>>> 1dcbc0aa4e7c43338cda49f94ff0a6820bf65684
 ```{r, fig.height=8, fig.width=12}
 df_all <- gather(df_percent,key = "RiskFactor", value = "Percent", colnames(df_percent%>%select(2:8)))
 #df_all
@@ -161,10 +148,7 @@ ggplot(df_all[df_all$RiskFactor!="Num",],aes(x=RiskFactor,y=Percent,fill=RiskFac
 We drawed Dot Plot for exploring other pattern or information about six risk factors. Here, the percentage distribution of each factor displayed clearly. We observe that among the proportion of diabetes population, obesity exists in a high percentage above 75% and smoking exists in a very low percentage below 40%, which means among all people who have diabetes, over 75% of them are overweight or obesity and under 40% of them have smoking habit. Population with diabetes are very likely to have obesity and are relatively less likely to smoke.<br>
 <br>
 From this plot, we can also figure out that *Obesity*, *Hypertension* and *High Cholesterol* are the top 3 risk factors which diabetes contingent on. Clearly, all of them are closely related to people's lifestyle and eating habits. An assumption that high-calorie food lovers are more easily to get diabetes than those who prefer healthy and balanced diet.<br>
-<<<<<<< HEAD
-=======
 <br>
->>>>>>> 1dcbc0aa4e7c43338cda49f94ff0a6820bf65684
 Looking into sugary and oily food(such as junk food) consumption data in each states may helps giving the answer for this assumption. 
 
 **Fast, Fried/Oily food (eg. Mcdonald's) Analysis**
@@ -186,10 +170,7 @@ ggplot(merge(df_percent %>%select(1,9)%>%
 
 
 Considering that diet habits specially fast foods could be an important factor for diabetes, we are able to draw a cleveland dot pot to make comparion of number of McDonald's location among all states. The states were ordered by percentage of diagnosed diabetes for easy reading.<br> 
-<<<<<<< HEAD
-=======
 <br>
->>>>>>> 1dcbc0aa4e7c43338cda49f94ff0a6820bf65684
 Even though there is no obvious clear pattern to show the relation between diabetes and number of McDonald's location, we are still able to observe a slightly general trend states with low diabetes proportion are also has less number of McDonald's per million people. Therefore we decide to draw another plot to see if this is the case.
 
 
@@ -249,11 +230,7 @@ ggplot(A)+geom_point(aes(x=reorder(State,Rank),y=Percent,col=Freq),alpha = 0.7, 
 ```
 
 
-<<<<<<< HEAD
-The above cleveland dot plot giving the answer is Yes. When the states have larger proportion of diabetes, the lower percentage people do not drink sweet beverage at all and higher percentage people drink more than 1 per day. In other words, percentage of more than 1 per day increases as the state's number of diabetes increases; percentages of less than 1 per day and no sweet beverage decreases as the state's number of diabetes increases. 
-=======
 The above cleveland dot plot giving the answer is Yes. When the states have larger proportion of diabetes, the lower percentage people do not drink sweet beverage at all and higher percentage people drink more than 1 per day. In other words, percentage of more than 1 per day increases as the state's number of diabetes increases; percentages of less than 1 per day and no sweet beverage decreases as the state's number of diabetes increases. <br>
->>>>>>> 1dcbc0aa4e7c43338cda49f94ff0a6820bf65684
 *Summary: *We believe that sweet beverage consumption does cause diabetes. <br>
 <br>
 Let's see another plot to ensure this result.
@@ -290,7 +267,6 @@ Drinking alcohol is also a bad diet habit which can cause lots of healthy proble
 df_alcohol <-merge(alcohol %>% select(1,5),df_percent%>%select(1,9))
 #df_alcohol
 ggplot(df_alcohol,aes(x=reorder(State,Rank),y=Num.Drink.per.Capita))+geom_bar(fill="salmon",alpha=0.6,stat = "identity")+coord_flip()+ ggtitle("State vs. Excessive Alcohol")+xlab("State(ordered by proportion of diabetes)")+ylab("Number of Drink per Capita")+theme_igray(16)
-<<<<<<< HEAD
 ```
 
 Originally, we presumed that alcohol will definitely increase the chance of being diabetes. Here we use horizontal bar plot to explore the relation between diabetes and excessive alcohol assumption. We ranked the states in the order from highest diabetes proportion in the top to lowest diabetes proportion in the bottom. Surprisingly, it appears no clear pattern or even a trend which approximately shows that number of excessive drinks per capita increases as number of diagnosed diabetes decreases that opposing against our original belief. However, after reading the papers and other materils about diabetes, it was found that excessive drinking may indeed causes a decrease in blood sugar, but this does not mean that excessive drinking can help relieve diabetes, even though the amount and types of alcohol might relate to diabetes in some way which requires for further researching. <br>
@@ -333,50 +309,6 @@ ggplot(df_edu,aes(x=percent,y=reorder(State,Rank),color=edu_level,label = percen
 
 Let's see how education levels affect diabetes! In the cleveland dot pot above, we ranked states from highest diabetes proportion to lowest, three types of education levels in different colors are almost clearly distinguished from each other. Among the diabetes population, the higher level of the education was gained, the lower percentage of diabetes the group would have. Represented by percentage numbers in the plot, we understand diabetes population with post high school education are only below 12%, diabetes population with high school education range from 6.8% to 16% with fluctuation, and those population with under high school education have most fluctuant percentages among states from 9.7% to 24.1%. Generally speaking, people with higher education level would pursue and possess a healthy lifestyle and great diet habits, which will prevent them from being diabetes to some degree. 
 
-=======
-```
-
-Originally, we presumed that alcohol will definitely increase the chance of being diabetes. Here we use horizontal bar plot to explore the relation between diabetes and excessive alcohol assumption. We ranked the states in the order from highest diabetes proportion in the top to lowest diabetes proportion in the bottom. Surprisingly, it appears no clear pattern or even a trend which approximately shows that number of excessive drinks per capita increases as number of diagnosed diabetes decreases that opposing against our original belief. However, after reading the papers and other materils about diabetes, it was found that excessive drinking may indeed causes a decrease in blood sugar, but this does not mean that excessive drinking can help relieve diabetes, even though the amount and types of alcohol might relate to diabetes in some way which requires for further researching. <br>
-<br>
-There are also other common and inevitable risk factors like age and gender. According to the research and background information we have, gender is not quite influential in diabetes, but age does. Hence, we analyzed on Age factor.
-
-**AGE Analysis**
-
-```{r, fig.height=8, fig.width=12}
-Age <- na.omit(Age[-1,])
-Age <- Age%>%filter(State != "Puerto Rico"&State!="Guam")
-# Age$State
-# state.abb[match(Age$State,state.name)]
-# Age$State <- state.abb[match(Age$State,state.name)]
-#na.omit(full_join(Age, Num)%>%select(1:5,7))
-df_age <- gather(Age, key = "Age", value = "Percent", colnames(Age%>%select(2:5)))
-#df_age
-df_age1 <- df_age %>% spread(State, Percent)
-#df_age1
-ggparcoord(df_age1, columns = 2:49, scale = "globalminmax", groupColumn = 1)+xlab("State")+ylab("Percentage")+ggtitle("Age Distribution in Each State")+theme_gray(16)+theme(axis.text.x = element_text(angle = 90))
-```
-
-In this parallel coordinate plot of age, each color line represents a specific age range, and each age range that having diabetes takes percentage from total diabetes in that state. It clearly shows that the percentage of being diabetes increases as age increases. Population in age 18-44 with diabetes have very low percentage (below 5%) on total diabetes and less fluctuation in each state. Over 45, proportion of diabetes becomes very fluctuant that really depending on states. Most states' diabetes population with 45-64 age are within 10% - 20%. The highest percentage of diabetes are located in age over 65, particularly between 65-74. This makes sense since the metabolic function of the pancreas becomes degenerated as age increases, which triggers the higher possibility to have diabetes. 
-
-<br>
-**Other Interesting Findings** <br>
-**Education**
-```{r, fig.height=8, fig.width=10}
-df_edu <- merge(na.omit(education[-c(1,53,54),]),df_percent %>% select(1,9),by="State")
-df_edu <- gather(df_edu,key = "edu_level",value = "percent",colnames(df_edu)[2:4])
-
-ggplot(df_edu,aes(x=percent,y=reorder(State,Rank),color=edu_level,label = percent))+
-  geom_text(aes(color = edu_level), size = 4)+
-  theme(legend.position = "top")+
-  ylab("State(ordered by Number of Diabetes)")+
-  xlab("Percentage")+
-  ggtitle("Education Level in each State")+
-  theme_minimal(14)+ scale_color_colorblind()
-```
-
-Let's see how education levels affect diabetes! In the cleveland dot pot above, we ranked states from highest diabetes proportion to lowest, three types of education levels in different colors are almost clearly distinguished from each other. Among the diabetes population, the higher level of the education was gained, the lower percentage of diabetes the group would have. Represented by percentage numbers in the plot, we understand diabetes population with post high school education are only below 12%, diabetes population with high school education range from 6.8% to 16% with fluctuation, and those population with under high school education have most fluctuant percentages among states from 9.7% to 24.1%. Generally speaking, people with higher education level would pursue and possess a healthy lifestyle and great diet habits, which will prevent them from being diabetes to some degree. 
-
->>>>>>> 1dcbc0aa4e7c43338cda49f94ff0a6820bf65684
 
 **GDP Analysis**
 
@@ -403,21 +335,14 @@ An overall correlation between every two factors from per capita GDP, sweet beve
 
 ##VI. Interactive component
 
-<<<<<<< HEAD
-=======
 **GitHub Repo**
 
 https://github.com/XinyiChenJ/Graphics_Final.git
 <br>
->>>>>>> 1dcbc0aa4e7c43338cda49f94ff0a6820bf65684
 **Shiny App: **
 
 https://xc2464.shinyapps.io/shiny/
 
-<<<<<<< HEAD
-<br>
-=======
->>>>>>> 1dcbc0aa4e7c43338cda49f94ff0a6820bf65684
 For more graphic patterns such as heatmap, they are shown in shiny app.
 
 ##VII. Conclusion
@@ -432,13 +357,10 @@ For future direction, eating habits seem to be very important so that we can do 
 <br>
 **Things Learned**
 The lessons that we learned from this project are that healthy diet habits and working out can not be ignored in daily life. People should reduce sugar consumption and drink water as the primary beverage. It is necessary to lose weight if you are overweight, and quit smoking might also be something you should consider.
-<<<<<<< HEAD
-=======
 
 <br>
 
 ##Reference
->>>>>>> 1dcbc0aa4e7c43338cda49f94ff0a6820bf65684
 
 https://gis.cdc.gov/grasp/diabetes/DiabetesAtlas.html <br>
 https://www.statista.com/statistics/631235/number-of-mcdonald-s-us-by-state/ <br>
