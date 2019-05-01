@@ -3,6 +3,7 @@ title: "Graphics Project"
 output:
   html_document:
     df_print: paged
+    code_folding: hide
 ---
 
 ```{r,include=FALSE}
@@ -24,11 +25,18 @@ library(ggthemes)
 
 ##I. Introduction
 
+<br>
+  As is well known, diabetes is a chronic (long-lasting) health condition that affects how your body turns food into energy. It causes more deaths per year than breast cancer and AIDS combined, and people with diabetes are at increased risk of serious health complications including premature death, vision loss, heart disease, stroke, kidney failure, and amputation of toes, feet, or legs.<br>
+<br>
+  Although it is truly can be treated as a severe disease and worth people's attention. However, according to *National Diabetes Statistics Report*, about 7.2 million (23.8%) adults in the US were not aware of or did not report having diabetes.Thus, we want to do some research and analysis about this disease to see what are the main reasons for causing diabetes and if what can we do for controling and preventing from it.<br>
+  
+![](../data(raw)/DB.jpg){width=600px}
+
 ##II. Description of the data source
 
 After considering potential influencing factors of diabetes, we are both responsible for collecting data in terms of different factors. Data are all from the original sources and mostly from "Centers for Disease Control and Prevention" and "Bureau of Economic Analysis" from U.S. Department of Commerce. In the form of getting the data, we either directly downloaded excels (or csv) or scraped data from the web pages. 
 
-Factors causing diabetes are grouped by several categories including physical indicators, age, education, diet habits, alcohol, and per capita GDP. Records are based on 53 states of US. In choosing data types, we do have total number and percentage of each factor (variable) for each state; however, every state has different amount of population, we will consider percentages of the totol number of each factor among total population as our metrice.
+Factors causing diabetes are grouped by several categories including physical indicators, age, education, diet habits, alcohol, and per capita GDP. Records are based on 53 states of US. In choosing data types, we do have total number and percentage of each factor (variable) for each state; however, every state has different amount of population, we will consider percentages of the total number of each factor among total population as our metrice.
 
 For physical indicators, High Cholesterol, Hypertension, Inactivity, Obesity, Poor Health and Smoking are counted. 
 
@@ -53,219 +61,14 @@ https://apps.bea.gov/itable/iTable.cfm?ReqID=70&step=1#reqid=70&step=1&isuri=1 <
 
 ##III. Description of data import / cleaning / transformation
 
-For the parts of data that directly downloading excel or csv from orginial websites, we used read.csv() to import into R for further data processing. Those data are including High Cholesterol, Hypertension, Inactivity, Obesity, Poor Health, Smoking, age, education, per capita GDP and number of McDonald's location.
+For the parts of data that directly downloading excel or csv from orginial websites, we used read.csv() to import into R for further data processing. Those data are including High Cholesterol, Hypertension, Inactivity, Obesity, Poor Health, Smoking, age, education, per capita GDP and number of McDonald's location. 
+<br>
+<br>
+On the other part of data that does not have nice downloadable excel or csv, we used packages tidyverse and rvest to scrap tables from official webpages and saved those tables into our .data/raw in .csv format. Those data include alcohol and sweet beverage consumption. 
+<br>
+<br>
+We mainly used pipeline operator methods like *select*, *filter*, to clean up the dataset and just leave the necessary part and also rename the columns with meaningful names. For some plots, we also need to narrow the dataset using *gather* or categorize numerical data into several categorical groups. All numeric related data are cleaned from character or factor type to double or integer form for being ready to later analysis.
 
-On the other part of data that does not have nice downloadable excel or csv, we used packages tidyverse and rvest to scrap tables from webpages and saved those tables into our .data/raw in .csv format. Those data include alcohol and sweet beverage consumption. In alcohol data frame, we renamed each column as Location, Total Cost, Cost Per Drink, Cost Per Capital respectively. In sweet beverage consumption data frame, we scraped two tables from one web page. After we checked each list item, it turns out that the tables we want are the second and third list elements: one is sweetened beverage consumption that are further specified by different ages, genders, races; the other is sweetened beverage consumption that are further specified by different employment status and education levels. Column names are taken into consideration to define each variable, and we removed the rows we don’t need. All numeric related data are cleaned from character form to numeric or integer form for being ready to later analysis.
-
-
-####Scraping data from webpages
-```{r}
-alcohol <- read_html("https://www.cdc.gov/alcohol/data-stats.htm") %>%
-  html_nodes("table") %>%
-  html_table(fill = TRUE) %>%
-  data.frame()
-colnames(alcohol) <- c("Location", "Total Cost($)","Cost Per Drink($)","Cost Per Capital($)")
-alcohol$`Total Cost($)` <- as.numeric(gsub(",","",alcohol$`Total Cost($)`))
-alcohol$`Cost Per Capital($)` <- as.numeric(gsub(",","",alcohol$`Cost Per Capital($)`))
-# alcohol
-# write.csv(alcohol, file = "alcohol.csv")
-```
-
-```{r}
-sugar2 <- read_html("https://www.cdc.gov/mmwr/volumes/65/wr/mm6507a1.htm#T2_down") %>%
-  html_nodes("table") %>%
-  html_table(fill=TRUE) %>%
-  .[2] %>%
-  data.frame()
-
-colnames(sugar2) <- sugar2[2,]
-sugar2 <- sugar2[c(-1,-2,-3),]
-sugar2$`18–24` <- as.numeric(sapply(unlist(sugar2$`18–24`),substr,1,4))
-sugar2$`25–34` <- as.numeric(sapply(unlist(sugar2$`25–34`),substr,1,4))
-sugar2$`35–54` <- as.numeric(sapply(unlist(sugar2$`35–54`),substr,1,4))
-sugar2$`≥55` <- as.numeric(sapply(unlist(sugar2$`≥55`),substr,1,4))
-sugar2$Male <- as.numeric(sapply(unlist(sugar2$Male),substr,1,4))
-sugar2$Female <- as.numeric(sapply(unlist(sugar2$Female),substr,1,4))
-sugar2$`White, Non-Hispanic` <- as.numeric(sapply(unlist(sugar2$`White, Non-Hispanic`),substr,1,4))
-sugar2$`Black, Non-Hispanic` <- as.numeric(sapply(unlist(sugar2$`Black, Non-Hispanic`),substr,1,4))
-sugar2$Hispanic <- as.numeric(sapply(unlist(sugar2$Hispanic),substr,1,4))
-sugar2$`Other, Non-Hispanic` <- as.numeric(sapply(unlist(sugar2$`Other, Non-Hispanic`),substr,1,4))
-sugar2$`No. respondents` <- as.numeric(gsub(",","",sugar2$`No. respondents`))
-# sugar2
-# write.csv(sugar2, file = "sugar2.csv")
-```
-
-```{r}
-sugar3 <- read_html("https://www.cdc.gov/mmwr/volumes/65/wr/mm6507a1.htm#T3_down") %>%
-  html_nodes("table") %>%
-  html_table(fill=TRUE) %>%
-  .[3] %>%
-  data.frame()
-
-colnames(sugar3) <- sugar3[2,]
-sugar3 <- sugar3[c(-1,-2,-3),]
-sugar3$Employed <- as.numeric(sapply(unlist(sugar3$Employed),substr,1,4))
-sugar3$`Not employed` <- as.numeric(sapply(unlist(sugar3$`Not employed`),substr,1,4))
-sugar3$Retired <- as.numeric(sapply(unlist(sugar3$`Not employed`),substr,1,4))
-sugar3$`<High school` <- as.numeric(sapply(unlist(sugar3$`<High school`),substr,1,4))
-sugar3$`High school` <- as.numeric(sapply(unlist(sugar3$`High school`),substr,1,4))
-sugar3$`Some college` <- as.numeric(sapply(unlist(sugar3$`Some college`),substr,1,4))
-sugar3$`College graduate` <- as.numeric(sapply(unlist(sugar3$`College graduate`),substr,1,4))
-sugar3$`No. respondents` <- as.numeric(gsub(",","",sugar3$`No. respondents`))
-# sugar3
-# write.csv(sugar3, file = "sugar3.csv")
-```
-
-
-####Read in Raw Data
-```{r}
-Sn <- read.csv("../data(raw)/Sn.csv",skip = 2, na.strings = "No Data")
-Sp <- read.csv("../data(raw)/Sp.csv",skip = 2, na.strings = "No Data")
-On <- read.csv("../data(raw)/On.csv",skip = 2, na.strings = "No Data")
-Op <- read.csv("../data(raw)/Op.csv",skip = 2, na.strings = "No Data")
-PGn <- read.csv("../data(raw)/PGn.csv",skip = 2, na.strings = "No Data")
-PGp <- read.csv("../data(raw)/PGp.csv",skip = 2, na.strings = "No Data")
-Dn <- read.csv("../data(raw)/Dn.csv",skip = 2, na.strings = "No Data")
-Dp <- read.csv("../data(raw)/Dp.csv",skip = 2, na.strings = "No Data")
-Phn <- read.csv("../data(raw)/Phn.csv",skip = 2, na.strings = "No Data")
-Php <- read.csv("../data(raw)/Php.csv",skip = 2, na.strings = "No Data")
-Hypern <- read.csv("../data(raw)/Hypern.csv",skip = 2, na.strings = "No Data")
-Hyperp <- read.csv("../data(raw)/Hyperp.csv",skip = 2, na.strings = "No Data")
-HCn <- read.csv("../data(raw)/HCn.csv",skip = 2, na.strings = "No Data")
-HCp <- read.csv("../data(raw)/HCp.csv",skip = 2, na.strings = "No Data")
-alcohol <- read.csv("../data(raw)/alcohol.csv")
-sugar1 <- read.csv("../data(raw)/sugar2.csv")
-sugar2 <- read.csv("../data(raw)/sugar3.csv")
-sugar3 <- read.csv("../data(raw)/sugar1.csv")
-underH <- read.csv("../data(raw)/<H.csv",skip = 2, na.strings = "No Data")
-H <- read.csv("../data(raw)/H.csv",skip = 2, na.strings = "No Data")
-postH <- read.csv("../data(raw)/>H.csv",skip = 2, na.strings = "No Data")
-age1 <- read.csv("../data(raw)/18-44.csv",skip = 2, na.strings = "No Data")
-age2 <- read.csv("../data(raw)/45-64.csv",skip = 2, na.strings = "No Data")
-age3 <- read.csv("../data(raw)/65-74.csv",skip = 2, na.strings = "No Data")
-age4 <- read.csv("../data(raw)/75+.csv",skip = 2, na.strings = "No Data")
-GDP2015 <- read.csv("../data(raw)/2015.csv",skip = 4)
-GDP2016 <- read.csv("../data(raw)/2016.csv", skip = 4)
-mcdonald <- read.xls("../data(raw)/mcdonald.xlsx")
-```
-
-
-####Basic Data Cleaning
-
-```{r}
-clean <- function(df1,df2){
-  df1 <- df1[-nrow(df1),]
-  df2 <- df2[-nrow(df2),]
-  overall <- full_join(df1,df2, by="State")
-  return(overall)
-}
-clean2 <- function(df1){
-  df1 <- df1[-nrow(df1),] %>% select(1:2)
-  return(df1)
-}
-```
-
-*DataFrame1--Minor Risk Factors*
-```{r}
-Smoking <- clean(Sn,Sp)
-Smoking$Type <- rep("Smoking",nrow(Smoking))
-
-Obesity <- clean(Op, On)
-Obesity$Type <- rep("Obesity",nrow(Obesity))
-
-
-Poor_Health <- clean(PGn, PGp)
-Poor_Health$Type <- rep("Poor_Health",nrow(Poor_Health))
-
-Num <- clean(Dn,Dp)
-Num$Type <- rep("Num",nrow(Num))
-
-Inactivity <- clean(Phn,Php)
-Inactivity$Type <- rep("Inactivity",nrow(Inactivity))
-
-Hypertension <- clean(Hyperp,Hypern)
-Hypertension$Type <- rep("Hypertension",nrow(Hypertension))
-
-Cholesterol <- clean(HCn, HCp)
-Cholesterol$Type <- rep("HighCholesterol",nrow(Cholesterol))
-
-Indicators <- rbind(Smoking,Obesity,Poor_Health,Num, Inactivity,Hypertension, Cholesterol)
-Indicators$Type <- as.factor(Indicators$Type)
-Indicators <- Indicators[-nrow(Indicators),]
-#Indicators
-```
-
-*DataFrame2--LifeStyle*
-```{r}
-alcohol <- alcohol %>% 
-  select(2:5) %>% 
-  mutate(Num.Drink.per.Capita = ceiling(Cost.Per.Capital.../Cost.Per.Drink...))
-names(alcohol)[1] <- "State"
-#alcohol
-
-names(sugar3) <- c("State","ResponseNum","NoSweetBev","less1perDay","more1perDay")
-SweetBev <- sugar3 %>% select(1,3,4,5)
-#SweetBev
-
-mcdonald <- mcdonald %>% select(State, Rank,McDonald.s.per.100.000)
-mcdonald$McDonald.s.per.100.000 <- as.numeric(gsub("[[:punct:]]","",as.character(mcdonald$McDonald.s.per.100.000)))
-names(mcdonald)[3] <- "McDonald.s.per.1M" 
-#mcdonald
-
-EatHab <- merge(merge(SweetBev,alcohol%>%select(1,5),by="State"),mcdonald%>%select(1,3),by="State")
-#EatHab
-```
-
-something maybe useful later
-```{r}
-# names(sugar1) <- c("State","No.","18-24","25-34","35-54","55+","Male","Female","White","Black","Hispanic","Other")
-# names(sugar2) <- c("State","No.","Employed","Unemployed","Retired","underHighSchool","HighSchool","College","College.Grad")
-
-#sugar3
-
-# SweetBev <- full_join(sugar1,sugar2,by="State")
-# SweetBev <- SweetBev[!duplicated(as.list(SweetBev))]
-# names(SweetBev)[2] <- "ResNumber"
-```
-
-*Major Influencial Factors*
-
-```{r}
-underH <- clean2(underH)
-names(underH) <- c("State","UnderHighSchool")
-H <- clean2(H)
-names(H) <- c("State","HighSchool")
-postH <- clean2(postH)
-names(postH) <- c("State","PostHighSchool")
-education <- full_join(full_join(underH,H,by="State"),postH,by="State")
-
-#education
-
-
-age1 <- clean2(age1)
-age2 <- clean2(age2)
-age3 <- clean2(age3)
-age4 <- clean2(age4)
-names(age1) <- c("State","18-44")
-names(age2) <- c("State","45-64")
-names(age3) <- c("State","65-74")
-names(age4) <- c("State","75+")
-Age <- full_join(full_join(full_join(age1,age2,by="State"),age3, by="State"),age4,by="State")
-
-Major <- full_join(education,Age,by="State")
-#Major
-```
-
-*Other Factors: GDP*
-```{r}
-GDP2015 <- GDP2015[2:(nrow(GDP2015)-11),]
-GDP2016 <- GDP2016[2:(nrow(GDP2016)-11),]
-names(GDP2015)[2:3] <- c("State","GDP2015")
-GDP <- GDP2015 %>% select(2,3)
-#GDP
-```
-
-**Load Cleaned Data**
 ```{r}
 load("../data(tidy)/Indicators.RData")
 load("../data(tidy)/EatHab.RData")
@@ -285,46 +88,27 @@ missingV <- full_join(full_join(full_join(full_join(ms,Age,by="State"),education
 Do we have missing values for datasets that involving all the variables?
 
 ```{r}
-colSums(is.na(missingV))
+# colSums(is.na(missingV))
 ```
 
 ```{r}
 extracat::visna(missingV, sort="b")
 ```
 
-Yes, we do. Here, we visualized missing patterns using the visna function in the extracat package. From above plot, we realized that there are 5 missing patterns by each row, and most columns have some kinds of missing values. By sorting both rows and columns, sweet beverage consumption related variables (NoSweetBev, less1perDay, more1perDay) have the most missing values, and we observed the top two most common missing patterns.
+Yes, we do. Here, we visualized missing patterns using the visna function in the extracat package. From above plot, we realized that there are 8 missing patterns by each row, and most columns have some kinds of missing values. By sorting both rows and columns, sweet beverage consumption related variables (NoSweetBev, less1perDay, more1perDay) have the most missing values, and we observed the top two most common missing patterns.
 
-
-```{r}
-#heatmap(1 * is.na(ms1), Rowv = NA, Colv = NA)
-#ms1
-#image(missing_data.frame(missingV))
-#extracat::visna(ms1)
-```
 
 **Dealing with missing values and Save as RData for convenience**
 
+For those States with low population like Virginia Island, Hawaii, we just simply eliminated those data from the dataframe for reducing the effects of potential outliers. However, for data as Sweet Beverage, we were only able to find the data for 24 states, which caused a lot of missing values compared with other datasets have 50+ states. Hence, the only way of dealing with this kind of situation was to separate it from the whole big dataset in case that it affects other analysis.
+
+
+##V. Results
+
+
+####Risk Factors Analysis
 ```{r}
-# Indicators <- na.omit(Indicators)
-# save(Indicators,file = "../data(tidy)/Indicators.RData")
-# #EatHab
-# save(EatHab,mcdonald,alcohol,SweetBev,file = "../data(tidy)/EatHab.RData")
-# 
-# Major <- na.omit(Major[-1,])
-# #Major
-# save(Age, education, Major,file = "../data(tidy)/Major.RData")
-# 
-# #GDP
-# save(GDP,file = "../data(tidy)/GDP.RData")
-```
-
-
-
-
-###Minor Risk Factors
-
-*Minor Risk Ractors Dataframe Reordered by Diagnosed Number*
-```{r}
+#*Minor Risk Ractors Dataframe Reordered by Diagnosed Number*
 df_percent <- na.omit(ms[,1:8][order(ms$Num),])
 df_percent <- df_percent %>% 
   filter(State != "Median of States" & State != "Guam" & State != "Puerto Rico") %>% 
@@ -333,8 +117,7 @@ df_percent <- df_percent %>%
 ```
 
 
-**Dot Plots(Facet-wrap)**
-**Diagnosed Number Against Every Minor Risk Factor**
+**Diagnosed Number Against Every Risk Factor**
 ```{r}
 ###rescale(narrow down) the dataframe for Num
 
@@ -343,22 +126,22 @@ df_num <- gather(df_percent,key = "Type", value = "Percent", colnames(df_percent
 ```
 
 
-```{r}
+```{r, fig.height=8, fig.width=10}
 ###Plot
 
-ggplot(df_num%>%filter(State != "Puerto Rico"),aes(x=Num, y=Percent))+geom_point() + facet_wrap(~ Type)+ggtitle("Diagnosed Diabetes vs. Potential Risk Factors") + xlab("Diagnosed Diabetes")
+ggplot(df_num%>%filter(State != "Puerto Rico"),aes(x=Num, y=Percent))+geom_point(col="darkblue") + facet_wrap(~ Type)+ggtitle("Diagnosed Diabetes vs. Potential Risk Factors") + xlab("Diagnosed Diabetes")+theme_gray(18)
 ```
 
-Idea: approximately all proportion of risk factors increases as proportion of diagnosed diabetes increases. Positively correlated. 
+Six potential risk factors above approximately show existing positively correlation with diagnosed Diabetes. Even though proportion of Physical Inactivity and Smoking is under 50% in all diagnosed diabetes, the overall trend shows that they do increase as proportion of diabetes increases. <br>
+The rest factors including Hypertension, High Cholesterol, Obesity and Poor General Health all showing a growing trend, which tells us that as proportion of diagnosed diabetes increases, the proportion of those risk factors increase as well. Therefore, all these risk factors do have influences on causing diabetes to some degree in the long run.<br>
+Now look at these factors using other graph pattern to get more information.
 
+**DotPlot**
 
-**Parallel Coordinates Plot**
-
-```{r}
+```{r, fig.height=8, fig.width=12}
 df_all <- gather(df_percent,key = "RiskFactor", value = "Percent", colnames(df_percent%>%select(2:8)))
 #df_all
-
-ggplot(df_all[df_all$RiskFactor!="Num",],aes(x=RiskFactor,y=Percent,fill=RiskFactor))+geom_dotplot(binaxis = "y",stackdir = "center",alpha=0.6,col="white")
+ggplot(df_all[df_all$RiskFactor!="Num",],aes(x=RiskFactor,y=Percent,fill=RiskFactor))+geom_dotplot(binaxis = "y",stackdir = "center",alpha=0.6,col="white",binwidth = 2)+ggtitle("Risk Factor Percentage of Diabetes")+theme_light(19)
 # temp <- df_all %>% group_by(RiskFactor) %>%
 #   mutate(Percent = scales::rescale(Percent)) %>% ungroup()
 # #temp
@@ -368,14 +151,135 @@ ggplot(df_all[df_all$RiskFactor!="Num",],aes(x=RiskFactor,y=Percent,fill=RiskFac
 # g1+theme(axis.text.x = element_text(angle = 90))+xlab("Risk Factor")
 ```
 
-From DotPlot, we can see the percentage distribution. 
+We drawed Dot Plot for exploring other pattern or information about six risk factors. Here, the percentage distribution of each factor displayed clearly. We observe that among the proportion of diabetes population, obesity exists in a high percentage above 75% and smoking exists in a very low percentage below 40%, which means among all people who have diabetes, over 75% of them are overweight or obesity and under 40% of them have smoking habit. Population with diabetes are very likely to have obesity and are relatively less likely to smoke.<br>
+<br>
+From this plot, we can also figure out that *Obesity*, *Hypertension* and *High Cholesterol* are the top 3 risk factors which diabetes contingent on. Clearly, all of them are closely related to people's lifestyle and eating habits. An assumption that high-calorie food lovers are more easily to get diabetes than those who prefer healthy and balanced diet.<br>
+Looking into sugary and oily food(such as junk food) consumption data in each states may helps giving the answer for this assumption. 
 
-**Major Risk Factors**
-*Age,Education, Life(Eating Habits)*
+**Fast, Fried/Oily food (eg. Mcdonald's) Analysis**
 
-AGE
+```{r, fig.height=8, fig.width=12}
+#mcdonald
+#df_percent %>% select(1,9)
+ggplot(merge(df_percent %>%select(1,9)%>%
+               filter(State != "Tennessee"&State!="Florida"&State!="New Jersey"),mcdonald%>%
+               select(1,3),by="State"))+
+  geom_point(aes(x=reorder(State,Rank),y=McDonald.s.per.1M),stat="identity",col="purple",alpha = 0.5, size = 4)+
+  geom_smooth(aes(x=reorder(State,Rank),y=McDonald.s.per.1M,group=1),se=F,lty=2)+
+  coord_flip()+
+  xlab("State(ordered by Number of Diabetes)")+
+  ylab("Number of McDonald's/million people")+
+  ggtitle("Number of McDonald's per Million People in each State")+
+  theme_minimal(16)
+```
 
+
+Considering that diet habits specially fast foods could be an important factor for diabetes, we are able to draw a cleveland dot pot to make comparion of number of McDonald's location among all states. The states were ordered by percentage of diagnosed diabetes for easy reading.<br> 
+Even though there is no obvious clear pattern to show the relation between diabetes and number of McDonald's location, we are still able to observe a slightly general trend states with low diabetes proportion are also has less number of McDonald's per million people. Therefore we decide to draw another plot to see if this is the case.
+
+
+```{r, fig.height=8, fig.width=8}
+
+mo_df <- merge(EatHab,df_percent%>%select(1,5,9),by="State")
+# mo_df$NoSweetBev <- ifelse(mo_df$NoSweetBev < 25, "15~24",ifelse(mo_df$NoSweetBev >=25 & mo_df$NoSweetBev <35, "25~34","35+"))
+# mo_df$less1perDay <- ifelse(mo_df$less1perDay < 40, "35~40",ifelse(mo_df$less1perDay >=40 & mo_df$less1perDay <45, "40~44","45+"))
+# 
+# mo_df$more1perDay <- ifelse(mo_df$more1perDay < 25, "15~24",ifelse(mo_df$more1perDay >=25 & mo_df$more1perDay <35, "25~34",ifelse(mo_df$more1perDay >=35 & mo_df$more1perDay <45,"35~44","45+")))
+
+mo_df$Num.Drink.per.Capita <- ifelse(mo_df$Num.Drink.per.Capita < 300, "200+",ifelse(mo_df$Num.Drink.per.Capita >=300 & mo_df$Num.Drink.per.Capita <400, "300+","400+"))
+
+mo_df$McDonald.s.per.1M <- ifelse(mo_df$McDonald.s.per.1M < 45, "<44",ifelse(mo_df$McDonald.s.per.1M >=45 & mo_df$McDonald.s.per.1M <55, "45~54", "55+"))
+
+mo_df$Rank <- ifelse(mo_df$Rank <= 10, "Bottom10",ifelse(mo_df$Rank >10 & mo_df$Rank <=20, "30-40",ifelse(mo_df$Rank >=20 & mo_df$Rank <30,"20~30",ifelse(mo_df$Rank >=30 & mo_df$Rank <40,"10~20","Top10"))))
+
+mo_df$Rank <- factor(mo_df$Rank,levels = c("Top10","10~20","20~30","30-40","Bottom10"))
+
+mosaic(McDonald.s.per.1M~Rank, 
+       gp = gpar(fill = c("darkseagreen", "lightgoldenrod2"),col = "white",alpha=1),spacing = spacing_equal(sp = unit(0.2, "lines")), labeling = labeling_border(rot_labels = c(0, 0, 0, 45)),mo_df)
+
+# mo_df$McDonald.s.per.1M <- ifelse(mo_df$McDonald.s.per.1M < 45, "35~44",ifelse(mo_df$McDonald.s.per.1M >=45 & mo_df$McDonald.s.per.1M <55, "45~54",ifelse(mo_df$McDonald.s.per.1M >=55 & mo_df$McDonald.s.per.1M <65,"55~64","65+")))
+# 
+# mo_df$Rank <- ifelse(mo_df$Rank <= 10, "Bottom10",ifelse(mo_df$Rank >10 & mo_df$Rank <=20, "30-40",ifelse(mo_df$Rank >=20 & mo_df$Rank <30,"20~30",ifelse(mo_df$Rank >=30 & mo_df$Rank <40,"10~20","Top10"))))
+# 
+# mosaic(McDonald.s.per.1M~Rank, 
+#        gp = gpar(fill = c("salmon", "lightblue"),col = "white",alpha=0.85),spacing = spacing_equal(sp = unit(0.2, "lines")), labeling = labeling_border(rot_labels = c(0, 0, 0, 45)),mo_df)
+
+```
+
+We divided states into five ranges in terms of ranking in diabetes proportion, and at the same time, the number of McDonalds are classified in 3 categories (less than 44 McDonalds per 1 million people, 45-54 McDonalds per 1 million people, greater than 55 McDonalds per 1 million people). The top 20 diabetes states has much larger proportion on 55+ McDonalds comparing with the bottom 20 diabetes states.<br>
+*Summary: *Food with high calories can contribute to increasing the risk of getting diabetes.
+Now we are interested in "Does drinking sweet beverages increases the possibility of diabetes? "<br>
+<br>
+**Sweet Beverage Analysis**
 ```{r}
+SweetBev[,2:4] <- apply(SweetBev[2:4],2,ceiling)
+#SweetBev
+SB <- merge(SweetBev,df_percent%>%select(1,9),by="State")
+A <- gather(SB,key = "Freq",value = "Percent",colnames(SweetBev)[2:4])
+#A
+# ls <- list()
+# ls2 <- list()
+# for (i in 1:72) {
+#   ls[i] <- list(rep(A$Freq[i],A$Percent[i]))
+#   ls2[i] <- list(rep(as.character(A$SweetBev.State[i]),A$Percent[i]))
+# }
+# 
+# cat_bev <- data.frame("State"=unlist(ls2),"BevFreq"= unlist(ls))
+# cat_bev$BevFreq <- as.character(cat_bev$BevFreq)
+#ggplot(A,aes(x=Freq,y=Percent,fill=factor(Freq)))+geom_dotplot(binaxis = "y",stackdir = "center")
+```
+
+```{r, fig.height=8, fig.width=12}
+ggplot(A)+geom_point(aes(x=reorder(State,Rank),y=Percent,col=Freq),alpha = 0.7, size = 4)+coord_flip()+ylab("Percent")+xlab("State(ordered by proportion of diabetes)")+ggtitle("State vs. Sweet Beverage Consumption")+theme_gray(18)+ scale_color_colorblind()
+```
+
+
+The above cleveland dot plot giving the answer is Yes. When the states have larger proportion of diabetes, the lower percentage people do not drink sweet beverage at all and higher percentage people drink more than 1 per day. In other words, percentage of more than 1 per day increases as the state's number of diabetes increases; percentages of less than 1 per day and no sweet beverage decreases as the state's number of diabetes increases. 
+*Summary: *We believe that sweet beverage consumption does cause diabetes. <br>
+<br>
+Let's see another plot to ensure this result.
+
+
+```{r, fig.height=8, fig.width=12}
+
+#mo_df
+df_eat <- merge(EatHab,df_percent%>%select(1,5,9),by="State")
+
+df_eat <- gather(df_eat, key = "RiskFactor", value = "Percent",colnames(df_eat%>%select(2:4,7)))
+#df_eat
+temp <- df_eat %>% group_by(RiskFactor) %>%
+  mutate(Percent = scales::rescale(Percent)) %>% ungroup()
+
+g1 <- ggplot(temp%>%filter(State != "Puerto Rico"), aes(x = reorder(State,Rank), y = Percent,group=RiskFactor,col=RiskFactor)) + 
+  geom_line(lwd=1) + ggtitle("Diagnosed Diabetes and Risk Factors")
+g1+theme_economist(14)+theme(axis.text.x = element_text(angle = 90))+xlab("States")+ scale_color_colorblind()
+
+
+
+#ggparcoord(mo_df[order(mo_df$Rank),],columns = 2:4, scale = "globalminmax", groupColumn = 8)
+```
+
+This line plot also provided the evidence that indicating sweet drinks contribute to development of diabetes. The more diabetes states have (purple line), the larger percentage of more1perDay (green line) they have, and the less percentage of less1perDay (red line) and NoSweetBev (blue line) they have. 
+*Conclusion: *Drinking sweet beverages seems to be an important factor to become diabetes.<br>
+<br>
+Drinking alcohol is also a bad diet habit which can cause lots of healthy problems, such as obesity. Thus, we got the data of excessive alcohol drinking among all states to see if it has any effects on diabetes.
+
+**Excessive Alcohol Analysis**
+
+```{r, fig.height=8, fig.width=12}
+#alcohol
+df_alcohol <-merge(alcohol %>% select(1,5),df_percent%>%select(1,9))
+#df_alcohol
+ggplot(df_alcohol,aes(x=reorder(State,Rank),y=Num.Drink.per.Capita))+geom_bar(fill="salmon",alpha=0.6,stat = "identity")+coord_flip()+ ggtitle("State vs. Excessive Alcohol")+xlab("State(ordered by proportion of diabetes)")+ylab("Number of Drink per Capita")+theme_igray(16)
+```
+
+Originally, we presumed that alcohol will definitely increase the chance of being diabetes. Here we use horizontal bar plot to explore the relation between diabetes and excessive alcohol assumption. We ranked the states in the order from highest diabetes proportion in the top to lowest diabetes proportion in the bottom. Surprisingly, it appears no clear pattern or even a trend which approximately shows that number of excessive drinks per capita increases as number of diagnosed diabetes decreases that opposing against our original belief. However, after reading the papers and other materils about diabetes, it was found that excessive drinking may indeed causes a decrease in blood sugar, but this does not mean that excessive drinking can help relieve diabetes, even though the amount and types of alcohol might relate to diabetes in some way which requires for further researching. <br>
+<br>
+There are also other common and inevitable risk factors like age and gender. According to the research and background information we have, gender is not quite influential in diabetes, but age does. Hence, we analyzed on Age factor.
+
+**AGE Analysis**
+
+```{r, fig.height=8, fig.width=12}
 Age <- na.omit(Age[-1,])
 Age <- Age%>%filter(State != "Puerto Rico"&State!="Guam")
 # Age$State
@@ -386,173 +290,72 @@ df_age <- gather(Age, key = "Age", value = "Percent", colnames(Age%>%select(2:5)
 #df_age
 df_age1 <- df_age %>% spread(State, Percent)
 #df_age1
-ggparcoord(df_age1, columns = 2:49, scale = "globalminmax", groupColumn = 1)+theme(axis.text.x = element_text(angle = 90))+xlab("State")+ylab("Percentage")+ggtitle("Age Distribution in Each State")
+ggparcoord(df_age1, columns = 2:49, scale = "globalminmax", groupColumn = 1)+xlab("State")+ylab("Percentage")+ggtitle("Age Distribution in Each State")+theme_gray(16)+theme(axis.text.x = element_text(angle = 90))
 ```
 
-Idea: 年龄越大越容易得，主要集中于65-74岁,等等。分析一下为什么。年纪大了胰脏代谢功能不好了等等。
-Note: add % on y-axis.
+In this parallel coordinate plot of age, each color line represents a specific age range, and each age range that having diabetes takes percentage from total diabetes in that state. It clearly shows that the percentage of being diabetes increases as age increases. Population in age 18-44 with diabetes have very low percentage (below 5%) on total diabetes and less fluctuation in each state. Over 45, proportion of diabetes becomes very fluctuant that really depending on states. Most states' diabetes population with 45-64 age are within 10% - 20%. The highest percentage of diabetes are located in age over 65, particularly between 65-74. This makes sense since the metabolic function of the pancreas becomes degenerated as age increases, which triggers the higher possibility to have diabetes. 
 
-
-*Education(Awareness of keeping fit/weight control/healthy lifestyle)*
-
-```{r}
+<br>
+**Other Interesting Findings** <br>
+**Education**
+```{r, fig.height=8, fig.width=10}
 df_edu <- merge(na.omit(education[-c(1,53,54),]),df_percent %>% select(1,9),by="State")
 df_edu <- gather(df_edu,key = "edu_level",value = "percent",colnames(df_edu)[2:4])
 
-# save(df_edu,file = "../data(tidy)/EduP.RData")
-
-ggplot(df_edu)+geom_bar(aes(reorder(State,Rank),percent,fill=edu_level),stat = "identity",alpha=0.6)+
-  xlab("State")+
-  ylab("Percentage")+
-  ggtitle("Education Level in each State (ordered by Number of Diabetes)")+
-  coord_flip()+
-  theme_igray()
-
 ggplot(df_edu,aes(x=percent,y=reorder(State,Rank),color=edu_level,label = percent))+
-  geom_text(aes(color = edu_level), size = 3)+
+  geom_text(aes(color = edu_level), size = 4)+
   theme(legend.position = "top")+
-  ylab("State")+
-  ggtitle("Education Level in each State (ordered by Number of Diabetes)")+
-  theme_minimal()
+  ylab("State(ordered by Number of Diabetes)")+
+  xlab("Percentage")+
+  ggtitle("Education Level in each State")+
+  theme_minimal(14)+ scale_color_colorblind()
 ```
 
-idea: 非常明显，学历越低的群体越多人患病，可能由于不注意健身，饮食习惯不佳等。接着往下看饮食习惯是否会影响。
-
-*excessive alcohol*
-
-```{r}
-#alcohol
-df_alcohol <-merge(alcohol %>% select(1,5),df_percent%>%select(1,9))
-#df_alcohol
-ggplot(df_alcohol,aes(x=reorder(State,Rank),y=Num.Drink.per.Capita))+geom_bar(fill="darkred",alpha=0.6,stat = "identity")+coord_flip()+ theme_igray()
-```
-
-Idea: No clear pattern or trend but approximately number of excessive drinks per capita increases as number of diagnosed diabetes increases. 非常weird超出想象但是在查阅资料后发现过量饮酒确实有可能导致血糖降低，但这并不代表过量饮酒能够帮助缓解糖尿病。只是酒的量与种类有关。接下来看beer的影响。
+Let's see how education levels affect diabetes! In the cleveland dot pot above, we ranked states from highest diabetes proportion to lowest, three types of education levels in different colors are almost clearly distinguished from each other. Among the diabetes population, the higher level of the education was gained, the lower percentage of diabetes the group would have. Represented by percentage numbers in the plot, we understand diabetes population with post high school education are only below 12%, diabetes population with high school education range from 6.8% to 16% with fluctuation, and those population with under high school education have most fluctuant percentages among states from 9.7% to 24.1%. Generally speaking, people with higher education level would pursue and possess a healthy lifestyle and great diet habits, which will prevent them from being diabetes to some degree. 
 
 
-*Fast Fried/oily food (eg. Mcdonald's)*
+**GDP Analysis**
 
-```{r}
-#mcdonald
-#df_percent %>% select(1,9)
-MCplot <- merge(df_percent %>%select(1,9)%>%filter(State != "Tennessee"&State!="Florida"&State!="New Jersey"),mcdonald%>%select(1,3),by="State")
-save(MCplot,file = "../data(tidy)/MCplot.RData")
-ggplot(MCplot)+
-  geom_point(aes(x=reorder(State,Rank),y=McDonald.s.per.1M),stat="identity",col="purple",alpha = 0.5, size = 4)+geom_smooth(aes(x=reorder(State,Rank),y=McDonald.s.per.1M,group=1))+
-  coord_flip()+
-  xlab("State")+
-  ylab("Number of McDonald/million people")+
-  ggtitle("Number of McDonald per Million People in each State")+
-  theme_minimal()
-```
-
-IDEA: 看起来有pattern了 但是可能会换一种图画，可以试试看。
-
-```{r}
-
-mo_df <- merge(EatHab,df_percent%>%select(1,5,9),by="State")
-# mo_df$NoSweetBev <- ifelse(mo_df$NoSweetBev < 25, "15~24",ifelse(mo_df$NoSweetBev >=25 & mo_df$NoSweetBev <35, "25~34","35+"))
-# mo_df$less1perDay <- ifelse(mo_df$less1perDay < 40, "35~40",ifelse(mo_df$less1perDay >=40 & mo_df$less1perDay <45, "40~44","45+"))
-# 
-# mo_df$more1perDay <- ifelse(mo_df$more1perDay < 25, "15~24",ifelse(mo_df$more1perDay >=25 & mo_df$more1perDay <35, "25~34",ifelse(mo_df$more1perDay >=35 & mo_df$more1perDay <45,"35~44","45+")))
-
-mo_df$Num.Drink.per.Capita <- ifelse(mo_df$Num.Drink.per.Capita < 300, "200+",ifelse(mo_df$Num.Drink.per.Capita >=300 & mo_df$Num.Drink.per.Capita <400, "300+","400+"))
-
-mo_df$McDonald.s.per.1M <- ifelse(mo_df$McDonald.s.per.1M < 45, "35~44",ifelse(mo_df$McDonald.s.per.1M >=45 & mo_df$McDonald.s.per.1M <55, "45~54",ifelse(mo_df$McDonald.s.per.1M >=55 & mo_df$McDonald.s.per.1M <65,"55~64","65+")))
-
-mo_df$Rank <- ifelse(mo_df$Rank <= 10, "Bottom10",ifelse(mo_df$Rank >10 & mo_df$Rank <=20, "30-40",ifelse(mo_df$Rank >=20 & mo_df$Rank <30,"20~30",ifelse(mo_df$Rank >=30 & mo_df$Rank <40,"10~20","Top10"))))
-
-mosaic(McDonald.s.per.1M~Rank, 
-       gp = gpar(fill = c("salmon", "lightblue"),col = "white",alpha=0.85),spacing = spacing_equal(sp = unit(0.2, "lines")), labeling = labeling_border(rot_labels = c(0, 0, 0, 45)),mo_df)
-
-
-
-```
-
-*Sweet Beverage*
-```{r}
-SweetBev[,2:4] <- apply(SweetBev[2:4],2,ceiling)
-#SweetBev
-SB <- merge(SweetBev,df_percent%>%select(1,9),by="State")
-A <- gather(SB,key = "Freq",value = "Percent",colnames(SweetBev)[2:4])
-A
-```
-
-```{r}
-ggplot()+geom_point(data=A,aes(x=reorder(State,Rank),y=Percent,col=Freq),alpha = 0.5, size = 4)+coord_flip()+ylab("Percent")+xlab("State(ordered by number of diabetes)")+ggtitle("State vs. Sweet Beverage Consumption")
-```
-
-
-
-
-```{r}
-
-#mo_df
-df_eat <- merge(EatHab,df_percent%>%select(1,5,9),by="State")
-names(df_eat)[7] <- "NumberOfDiabetes"
-df_eat <- gather(df_eat, key = "RiskFactor", value = "Percent",colnames(df_eat%>%select(2:4,7)))
-#df_eat
-temp <- df_eat %>% group_by(RiskFactor) %>%
-  mutate(Percent = scales::rescale(Percent)) %>% ungroup()
-temp <- temp%>%filter(State != "Puerto Rico")
-
-temp
-#save(temp,file = "../data(tidy)/Sbev.RData")
-
-
-g1 <- ggplot(temp%>%filter(RiskFactor=="NoSweetBev"|RiskFactor=="NumberOfDiabetes"), aes(x = reorder(State,Rank), y = Percent,group=RiskFactor,col=RiskFactor)) + 
-  geom_line(alpha = .5) + ggtitle("Diagnosed Diabetes and Risk Factors")
-g1+theme(axis.text.x = element_text(angle = 90))+xlab("Risk Factor")
-
-
-
-#ggparcoord(mo_df[order(mo_df$Rank),],columns = 2:4, scale = "globalminmax", groupColumn = 8)
-```
-
-IDEA: state 是按照diabetes数量由大到小排列。很明显生病人数越多的州，NoSweetBev 和 less1perDay 越多，more1perDay越多。
-
-
-
-GDP
-
-```{r}
+```{r, fig.height=8, fig.width=12}
 df_gdp <- merge(GDP,df_percent%>%select(1,9)%>%filter(State!="District of Columbia"),by="State")
 df_gdp$Diabetes_Rank <- ifelse(df_gdp$Rank <= 10, "Bottom10",ifelse(df_gdp$Rank >10 & df_gdp$Rank <=40, "Middle","Top10"))
-#save(df_gdp,file = "../data(tidy)/GDP_plot.RData")
-ggplot(df_gdp)+geom_point(aes(x=reorder(State,Rank),y=GDP2015,col=Diabetes_Rank))+coord_flip()+xlab("State(ordered by number of diabetes)")
+#df_gdp
+ggplot(df_gdp)+geom_point(aes(x=reorder(State,Rank),y=GDP2015,col=Diabetes_Rank,shape=Diabetes_Rank),size=4,alpha=0.8)+geom_smooth(aes(x=reorder(State,Rank),y=GDP2015,group=1),method="lm",se=F,col="orange")+coord_flip()+xlab("State")+ylab("GDP")+ggtitle("States(ordered by proportion of diabetes) GDP Trend")+theme_classic(16)
 ```
 
-IDEA: overall trend来说，GDP越高得病的人越少。
-Diabetes_Rank是得病人数的rank排列，越高得病的人越多。Top10就是最多的州。很明显前十的GDP都不咋样。
+Per Capita GDP is an important indicator of economic condition. With higher per capita GDP, it seems that people are more capable of improving life standard and preventing themselves from being diabetes. This dot pot displays three kinds of colors, blue dots representing top 10 states with largest number of diabetes, green dots representing middle states and red dots showing the bottom 10 states with smallest number of diabetes. It seems clear that the top 10 states has very low per capita GDP below 50000. The rest of states have relatively higher per capita GDP and fluctuant ranges. 
 
 
-```{r,message=FALSE}
+```{r,message=FALSE, fig.height=12, fig.width=12}
 #merge(df_gdp,EatHab%>%select(1:4,6),by="State")
 
 ggpairs(merge(df_gdp,EatHab%>%select(1:4,6),by="State"),columns = c(2,5:8),
-  mapping=ggplot2::aes(colour = Diabetes_Rank,alpha=0.6))
+  mapping=ggplot2::aes(colour = Diabetes_Rank,alpha=0.6))+theme_gray(15)
 ```
 
-GDP和Eating Habits（fastfood, beer,sweetbev）的关系图，GDP越高，麦当劳越少，喝甜饮料的越少，因此饮食习惯好了，得病就少。反之就多。
+An overall correlation between every two factors from per capita GDP, sweet beverages and fast food (McDonald) can be shown from above pairs correlation plot. The higher the per capita GDP is, the less number of McDonald's in that state. Moreover, the higher the per capita GDP is, the less likely people drink sweet beverages. In a sense, with higher per capita GDP condition, people tends to healthier eating habits (less fastfood and sweet beverages), which reduces the chance of diagnosed diabetes.
 
-
-```{r}
-B <- gather(merge(df_gdp,education,by="State"),key = "EDU",value = "Percent",colnames(merge(df_gdp,education,by="State"))[5:7])
-merge(df_gdp,education,by="State")
-ggplot(B,aes(x=GDP2015,y=Percent))+geom_point(aes(col=EDU))+geom_smooth(method = "lm",col="orange",size=0.7)
-ggpairs(merge(df_gdp,education,by="State"),columns = c(2,5:7),
-  mapping=ggplot2::aes(colour = Diabetes_Rank,alpha=0.6))
-```
-
-IDEA:GDP越高,得病人数越少，学历越高他们之间的correlation绝对值越高，即更加负相关。
-
-
-##V. Results
 
 
 ##VI. Interactive component
 
+**Shiny App: **
+
+https://xc2464.shinyapps.io/shiny/
+
+<br>
+For more graphic patterns such as heatmap, they are shown in shiny app.
 
 ##VII. Conclusion
 
+**Limitations**
+Factor triggering diabetes is a very interesting research and has pratical meaning. It definitely deserves for further researching. In our project, we found many factors that positively related to diabetes, such as obesity, diet habits, etc. Also, we surprisingly observed that excessive alcohol is negatively related to diabetes and it really depdends on types and the amount of the alcohol. However, limited data stopped us from finding a clearer pattern and results. We are only able to get data for 2015 and some of datasets only include 24 states. In this situation, we could not prevent errors from the limitation of data. 
+<br>
+<br>
+**Future Direction**
+For future direction, eating habits seem to be very important so that we can do more research in this area, which can give people a lot of advice to avoid diabetes. For example, the GI value of food, whether eating red meat and white meat will have an effect, whether sweet beverages should be replaced by coffee or tea, and so on. We will also do more relative research and find more comprehensive data. Right now, we only explored physical factors that causing diabetes, but mental health might have an impact as well. Furthermore, family inheritance: which body type or disease may be inherited and causes a higher risk of diabetes for the next generation. Equally important is that what can prevent diabetes.
+<br>
+<br>
+**Things Learned**
+The lessons that we learned from this project are that healthy diet habits and working out can not be ignored in daily life. People should reduce sugar consumption and drink water as the primary beverage. It is necessary to lose weight if you are overweight, and quit smoking might also be something you should consider.
 
