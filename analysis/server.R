@@ -35,6 +35,7 @@ Total <- Ind_P[Ind_P$Type=="Num",]
 Hyp <- Ind_P[Ind_P$Type=="Hypertension",]
 HC <- Ind_P[Ind_P$Type=="HighCholesterol",]
 
+df_edu$edu_level <- factor(df_edu$edu_level,c("PostHighSchool","HighSchool","UnderHighSchool"))
 
 color = list(color1 = c('#ffffcc','#a1dab4','#41b6c4','#2c7fb8','#253494'),
              color2 = c('#fee5d9','#fcae91','#fb6a4a','#de2d26','#a50f15'),
@@ -302,20 +303,20 @@ shinyServer(function(input, output,session) {
   
   output$plot4<- renderPlot({
     ggplot(df_edu)+geom_bar(aes(reorder(State,Rank),percent,fill=edu_level),stat = "identity",alpha=0.6)+
-      xlab("State(ordered by Number of Diabetes)")+
+      xlab("State(ordered by proportion of Diabetes)")+
       ylab("Percentage")+
       ggtitle("Education Level in each State")+
       coord_flip()+
-      theme_classic2()
+      theme_classic2()+scale_fill_colorblind()
   })
   
   output$plot5 <- renderPlot({
     ggplot(df_gdp)+
       geom_point(aes(x=reorder(State,Rank),y=GDP2015,col=Diabetes_Rank))+
       coord_flip()+
-      xlab("State(ordered by number of diabetes)")+
+      xlab("State(ordered by proportion of diabetes)")+
       ggtitle("GDP in each State")+
-      theme_classic()
+      theme_classic()+scale_color_colorblind()
   })
   
  # output$map2 <- renderLeaflet({
