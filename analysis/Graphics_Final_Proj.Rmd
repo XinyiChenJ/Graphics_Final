@@ -1,5 +1,5 @@
 ---
-title: "Graphics Project"
+title: "Graphics Project--What causes diabetes?"
 output:
   html_document:
     df_print: paged
@@ -49,14 +49,6 @@ In order to consider diet habits that affacting diabetes, we took sweet beverage
 Alcohol is a kind of popular lifestyle in US which let us to think about whether excessive alcohol consumption is one of major factor causing diabetes in the long run. 
 
 Moreover, Per capita GDP is also important indicator for representing economic condition of each state, which might potentially affacts the chance of being diabetes.
-
-####Reference
-
-https://gis.cdc.gov/grasp/diabetes/DiabetesAtlas.html <br>
-https://www.statista.com/statistics/631235/number-of-mcdonald-s-us-by-state/ <br>
-https://www.cdc.gov/alcohol/data-stats.htm <br> 
-https://www.cdc.gov/mmwr/volumes/65/wr/mm6507a1.htm <br>
-https://apps.bea.gov/itable/iTable.cfm?ReqID=70&step=1#reqid=70&step=1&isuri=1 <br>
 
 
 ##III. Description of data import / cleaning / transformation
@@ -133,7 +125,9 @@ ggplot(df_num%>%filter(State != "Puerto Rico"),aes(x=Num, y=Percent))+geom_point
 ```
 
 Six potential risk factors above approximately show existing positively correlation with diagnosed Diabetes. Even though proportion of Physical Inactivity and Smoking is under 50% in all diagnosed diabetes, the overall trend shows that they do increase as proportion of diabetes increases. <br>
+<br>
 The rest factors including Hypertension, High Cholesterol, Obesity and Poor General Health all showing a growing trend, which tells us that as proportion of diagnosed diabetes increases, the proportion of those risk factors increase as well. Therefore, all these risk factors do have influences on causing diabetes to some degree in the long run.<br>
+<br>
 Now look at these factors using other graph pattern to get more information.
 
 **DotPlot**
@@ -154,6 +148,7 @@ ggplot(df_all[df_all$RiskFactor!="Num",],aes(x=RiskFactor,y=Percent,fill=RiskFac
 We drawed Dot Plot for exploring other pattern or information about six risk factors. Here, the percentage distribution of each factor displayed clearly. We observe that among the proportion of diabetes population, obesity exists in a high percentage above 75% and smoking exists in a very low percentage below 40%, which means among all people who have diabetes, over 75% of them are overweight or obesity and under 40% of them have smoking habit. Population with diabetes are very likely to have obesity and are relatively less likely to smoke.<br>
 <br>
 From this plot, we can also figure out that *Obesity*, *Hypertension* and *High Cholesterol* are the top 3 risk factors which diabetes contingent on. Clearly, all of them are closely related to people's lifestyle and eating habits. An assumption that high-calorie food lovers are more easily to get diabetes than those who prefer healthy and balanced diet.<br>
+<br>
 Looking into sugary and oily food(such as junk food) consumption data in each states may helps giving the answer for this assumption. 
 
 **Fast, Fried/Oily food (eg. Mcdonald's) Analysis**
@@ -175,6 +170,7 @@ ggplot(merge(df_percent %>%select(1,9)%>%
 
 
 Considering that diet habits specially fast foods could be an important factor for diabetes, we are able to draw a cleveland dot pot to make comparion of number of McDonald's location among all states. The states were ordered by percentage of diagnosed diabetes for easy reading.<br> 
+<br>
 Even though there is no obvious clear pattern to show the relation between diabetes and number of McDonald's location, we are still able to observe a slightly general trend states with low diabetes proportion are also has less number of McDonald's per million people. Therefore we decide to draw another plot to see if this is the case.
 
 
@@ -234,7 +230,7 @@ ggplot(A)+geom_point(aes(x=reorder(State,Rank),y=Percent,col=Freq),alpha = 0.7, 
 ```
 
 
-The above cleveland dot plot giving the answer is Yes. When the states have larger proportion of diabetes, the lower percentage people do not drink sweet beverage at all and higher percentage people drink more than 1 per day. In other words, percentage of more than 1 per day increases as the state's number of diabetes increases; percentages of less than 1 per day and no sweet beverage decreases as the state's number of diabetes increases. 
+The above cleveland dot plot giving the answer is Yes. When the states have larger proportion of diabetes, the lower percentage people do not drink sweet beverage at all and higher percentage people drink more than 1 per day. In other words, percentage of more than 1 per day increases as the state's number of diabetes increases; percentages of less than 1 per day and no sweet beverage decreases as the state's number of diabetes increases. <br>
 *Summary: *We believe that sweet beverage consumption does cause diabetes. <br>
 <br>
 Let's see another plot to ensure this result.
@@ -339,11 +335,14 @@ An overall correlation between every two factors from per capita GDP, sweet beve
 
 ##VI. Interactive component
 
+**GitHub Repo**
+
+https://github.com/XinyiChenJ/Graphics_Final.git
+<br>
 **Shiny App: **
 
 https://xc2464.shinyapps.io/shiny/
 
-<br>
 For more graphic patterns such as heatmap, they are shown in shiny app.
 
 ##VII. Conclusion
@@ -359,3 +358,12 @@ For future direction, eating habits seem to be very important so that we can do 
 **Things Learned**
 The lessons that we learned from this project are that healthy diet habits and working out can not be ignored in daily life. People should reduce sugar consumption and drink water as the primary beverage. It is necessary to lose weight if you are overweight, and quit smoking might also be something you should consider.
 
+<br>
+
+##Reference
+
+https://gis.cdc.gov/grasp/diabetes/DiabetesAtlas.html <br>
+https://www.statista.com/statistics/631235/number-of-mcdonald-s-us-by-state/ <br>
+https://www.cdc.gov/alcohol/data-stats.htm <br> 
+https://www.cdc.gov/mmwr/volumes/65/wr/mm6507a1.htm <br>
+https://apps.bea.gov/itable/iTable.cfm?ReqID=70&step=1#reqid=70&step=1&isuri=1 <br>
